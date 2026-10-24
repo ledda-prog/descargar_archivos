@@ -25,6 +25,7 @@ const HOST = resolveListenHost();
 const PORT = Number(process.env.PORT) || 3000;
 const INDEX_PATH = path.join(__dirname, '..', 'index.html');
 const YT_DLP_COMMAND = process.env.YT_DLP_PATH || 'yt-dlp';
+const FFMPEG_PATH = process.env.FFMPEG_PATH || null;
 const MAX_FILE_BYTES = 500 * 1024 * 1024;
 const PROCESS_TIMEOUT_MS = 10 * 60 * 1000;
 const JOB_TTL_MS = 30 * 60 * 1000;
@@ -185,6 +186,7 @@ const baseArgs = [
   '--max-filesize', '500M',
   '--no-warnings',
   '--no-cache-dir',
+  ...(FFMPEG_PATH ? ['--ffmpeg-location', FFMPEG_PATH] : []),
 ];
 
 async function getInfo(url, proxyUrl) {
@@ -325,7 +327,7 @@ async function sendJobFile(job, res) {
   stream.pipe(res);
 }
 
-async function main() {
+async function startServer({ host = HOST, port = PORT, installSignalHandlers = true } = {}) {
   const proxy = await startSafeProxy();
   const server = http.createServer(async (req, res) => {
     if (!setCors(req, res)) return sendJson(res, 403, { error: 'Origen no permitido' });
@@ -412,14 +414,40 @@ async function main() {
     }
   });
 
-  server.listen(PORT, HOST, () => console.log(`Backend activo en http://${HOST}:${PORT}`));
-  const shutdown = () => server.close(() => proxy.close().finally(() => process.exit(0)));
-  process.on('SIGINT', shutdown);
-  process.on('SIGTERM', shutdown);
+  await new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(port, host, resolve);
+  });
+  const address = server.address();
+  const actualPort = typeof address === 'object' && address ? address.port : port;
+  const url = `http://${host}:${actualPort}`;
+  console.log(`Backend activo en ${url}`);
+  let closed = false;
+  const close = async () => {
+    if (closed) return;
+    closed = true;
+    for (const job of jobs.values()) {
+      if (['queued', 'processing'].includes(job.status)) cancelJob(job);
+      clearTimeout(job.expiryTimer);
+      await removeJobFiles(job);
+    }
+    jobs.clear();
+    await new Promise((resolve) => {
+      server.close(resolve);
+      server.closeAllConnections?.();
+    });
+    await proxy.close();
+  };
+  if (installSignalHandlers) {
+    const shutdown = () => close().finally(() => process.exit(0));
+    process.once('SIGINT', shutdown);
+    process.once('SIGTERM', shutdown);
+  }
+  return { server, proxy, url, close };
 }
 
 if (require.main === module) {
-  main().catch((error) => {
+  startServer().catch((error) => {
     console.error(error.message);
     process.exit(1);
   });
@@ -432,4 +460,5 @@ module.exports = {
   publicExtractorError,
   removeJobFiles,
   scheduleJobExpiry,
+  startServer,
 };

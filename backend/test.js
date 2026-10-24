@@ -287,3 +287,9 @@ test('frontend estático muestra errores de backend configurado o inaccesible', 
   assert.match(frontend, /Backend no disponible/);
   assert.match(frontend, /servicio de descargas/);
 });
+
+test('landing ofrece la aplicación portable de Windows desde GitHub Releases', async () => {
+  const frontend = await fs.readFile(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.match(frontend, /Descargar para Windows/);
+  assert.match(frontend, /github\.com\/ledda-prog\/descargar_archivos\/releases\/latest/);
+});

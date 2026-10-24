@@ -14,7 +14,9 @@ MediaHub es una aplicación web local funcional. Usa Node.js, `yt-dlp` y FFmpeg 
 - El recuadro MP4/MP3 se completa visualmente según el progreso.
 - Video usa las resoluciones reales disponibles con selección estricta o máxima calidad; audio permite 128, 192 o 320 kbps.
 - Compartir envía la URL de MediaHub, no el archivo ni el enlace del contenido.
-- YouTube usa `web_safari,web_embedded` como fallback sin cookies ante bloqueos anti-bot.
+- YouTube deja que `yt-dlp` elija los clientes públicos compatibles, sin cookies.
+- La variante Windows usa Electron, inicia el backend en un puerto local aleatorio y empaqueta `yt-dlp.exe` y `ffmpeg.exe`.
+- La landing de Vercel enlaza la última versión portable publicada en GitHub Releases.
 - El historial vive solo en `localStorage`, admite hasta 20 entradas y no conserva archivos ni IDs de trabajos.
 - `PUBLIC_BASE_URL` es opcional, solo acepta HTTPS (o HTTP local de desarrollo) y define el enlace compartido sin publicar ni reconfigurar la escucha local.
 - La interfaz ofrece Web Share cuando existe, copiar enlace y WhatsApp; advierte cuando la URL solo funciona en el mismo equipo.

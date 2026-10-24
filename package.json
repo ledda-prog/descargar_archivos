@@ -3,10 +3,54 @@
   "version": "1.0.0",
   "private": true,
   "description": "Descargador local de contenido propio o autorizado",
+  "author": "ledda-prog",
+  "repository": "https://github.com/ledda-prog/descargar_archivos",
+  "main": "desktop/main.js",
   "scripts": {
     "start": "node backend/server.js",
     "build": "node scripts/build-vercel.js",
-    "test": "node --test backend/test.js"
+    "test": "node --test backend/test.js",
+    "desktop:dev": "electron .",
+    "desktop:dist": "electron-builder --win portable"
+  },
+  "dependencies": {
+    "ffmpeg-static": "5.3.0",
+    "youtube-dl-exec": "3.1.17"
+  },
+  "devDependencies": {
+    "electron": "45.0.0",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "com.mediahub.desktop",
+    "productName": "MediaHub",
+    "asar": true,
+    "files": [
+      "assets/**/*",
+      "backend/**/*",
+      "desktop/**/*",
+      "index.html",
+      "manifest.webmanifest",
+      "sw.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "node_modules/youtube-dl-exec/bin/yt-dlp.exe",
+        "to": "bin/yt-dlp.exe"
+      },
+      {
+        "from": "node_modules/ffmpeg-static/ffmpeg.exe",
+        "to": "bin/ffmpeg.exe"
+      }
+    ],
+    "win": {
+      "target": "portable",
+      "artifactName": "MediaHub-Portable-${version}.${ext}"
+    },
+    "directories": {
+      "output": "release"
+    }
   },
   "engines": {
     "node": ">=20"

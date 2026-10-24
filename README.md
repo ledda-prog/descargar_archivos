@@ -4,6 +4,25 @@ Aplicación para descargar contenido propio o autorizado desde URLs públicas co
 
 La versión web también es una PWA instalable.
 
+## Aplicación portable para Windows
+
+La landing pública continúa en Vercel, pero la versión de Windows ejecuta el backend, `yt-dlp` y FFmpeg en la PC del usuario. Así, el procesamiento usa su conexión en lugar de la IP de Render. No garantiza que todas las plataformas acepten todos los enlaces y no evade autenticación, DRM ni restricciones.
+
+Para desarrollo:
+
+```powershell
+npm install
+npm run desktop:dev
+```
+
+Para generar `release/MediaHub-Portable-1.0.0.exe`:
+
+```powershell
+npm run desktop:dist
+```
+
+El ejecutable debe publicarse como archivo de una versión en GitHub Releases. El botón **Descargar para Windows** de Vercel apunta siempre a la versión más reciente. Windows puede mostrar una advertencia de SmartScreen mientras el ejecutable no esté firmado digitalmente.
+
 ## Iniciar
 
 Hacer clic derecho en `start.ps1` y elegir **Ejecutar con PowerShell**, o ejecutar:
@@ -59,6 +78,8 @@ Consultar [TESTING.md](TESTING.md) para pruebas manuales.
 ## Despliegue dividido
 
 No se despliega automáticamente. El orden recomendado es Render primero y Vercel después.
+
+La versión web mantiene este despliegue. La aplicación portable no depende de Render para procesar descargas.
 
 ### 1. Backend en Render
 
