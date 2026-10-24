@@ -19,9 +19,9 @@ const {
   buildVideoFormatSelector,
   isAllowedQuality,
 } = require('./formats');
-const { validatePublicBaseUrl } = require('./config');
+const { parseAllowedOrigins, resolveListenHost, validatePublicBaseUrl } = require('./config');
 
-const HOST = '127.0.0.1';
+const HOST = resolveListenHost();
 const PORT = Number(process.env.PORT) || 3000;
 const INDEX_PATH = path.join(__dirname, '..', 'index.html');
 const YT_DLP_COMMAND = process.env.YT_DLP_PATH || 'yt-dlp';
@@ -30,6 +30,7 @@ const PROCESS_TIMEOUT_MS = 10 * 60 * 1000;
 const JOB_TTL_MS = 30 * 60 * 1000;
 const MAX_ACTIVE_JOBS = 2;
 const PUBLIC_BASE_URL = validatePublicBaseUrl(process.env.PUBLIC_BASE_URL);
+const ALLOWED_ORIGINS = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
 const jobs = new Map();
 
 async function removeJobFiles(job) {
@@ -75,7 +76,7 @@ function sendJson(res, status, body) {
 
 function setCors(req, res) {
   const origin = req.headers.origin;
-  if (!isAllowedOrigin(origin)) return false;
+  if (!isAllowedOrigin(origin, ALLOWED_ORIGINS)) return false;
   if (origin) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');

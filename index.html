@@ -67,10 +67,13 @@
     </main>
     <footer class="legal"><strong>Uso responsable:</strong> MediaHub no descarga ni ayuda a eludir controles de acceso, DRM o restricciones de las plataformas. Usalo solo con contenido propio, con permiso explícito o mediante integraciones oficialmente soportadas.</footer>
   </div>
+  <!-- MEDIAHUB_API_CONFIG -->
   <script>
     (() => {
       'use strict';
-      const API_BASE=(window.MEDIAHUB_API_BASE||(location.protocol==='http:'||location.protocol==='https:'?location.origin:'http://127.0.0.1:3000')).replace(/\/$/,'');
+      const configuredApiBase=typeof window.MEDIAHUB_API_BASE==='string'?window.MEDIAHUB_API_BASE.trim():'';
+      const localFrontend=location.protocol==='file:'||['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname.toLowerCase());
+      const API_BASE=(configuredApiBase||(localFrontend?(location.protocol==='file:'?'http://127.0.0.1:3000':location.origin):'')).replace(/\/$/,'');
       const $=selector=>document.querySelector(selector);
       const form=$('#downloadForm'),urlInput=$('#url'),permission=$('#permission'),button=$('#submit'),downloadButton=$('#downloadButton'),cancelButton=$('#cancelButton'),shareButton=$('#shareButton'),copyLinkButton=$('#copyLinkButton'),whatsAppButton=$('#whatsAppButton'),shareHint=$('#shareHint'),statusBox=$('#status'),progress=$('#progress'),result=$('#result'),thumbnail=$('#thumbnail'),mediaTitle=$('#mediaTitle'),platform=$('#platform'),duration=$('#duration'),qualitySelect=$('#quality'),qualityLabel=$('#qualityLabel'),qualityHint=$('#qualityHint'),historyList=$('#historyList'),historyEmpty=$('#historyEmpty'),clearHistoryButton=$('#clearHistoryButton');
       const HISTORY_KEY='mediahub.downloadHistory.v1',HISTORY_LIMIT=20;
@@ -203,9 +206,10 @@
         catch{return 'El servidor respondió con error '+response.status+'.'}
       }
       async function requestJson(path,options={}){
+        if(!API_BASE)throw new Error('El backend no está configurado. Definí MEDIAHUB_API_BASE con la URL HTTPS de Render y volvé a desplegar el frontend.');
         let response;
         try{response=await fetch(API_BASE+path,options)}
-        catch{throw new Error('No se pudo conectar con el backend local en '+API_BASE+'. Verificá que esté iniciado y permita CORS.')}
+        catch{throw new Error('No se pudo conectar con el servicio de descargas en '+API_BASE+'. Puede estar iniciándose o temporalmente fuera de servicio.')}
         if(!response.ok)throw new Error(await readError(response));
         return response.json();
       }
@@ -220,7 +224,8 @@
           : 'Se compartirá: '+value;
       }
       async function loadPublicConfig(){
-        try{const config=await requestJson('/api/config',{cache:'no-store'});publicBaseUrl=typeof config.public_base_url==='string'?config.public_base_url:null}catch{publicBaseUrl=null}
+        try{const config=await requestJson('/api/config',{cache:'no-store'});publicBaseUrl=typeof config.public_base_url==='string'?config.public_base_url:null}
+        catch(error){publicBaseUrl=null;button.disabled=true;showStatus('error','Backend no disponible',error.message||'No se pudo contactar el servicio de descargas.')}
         updateShareHint();
       }
       async function copyText(value){
@@ -230,7 +235,9 @@
       }
       function setShareDisabled(disabled){shareButton.disabled=disabled;copyLinkButton.disabled=disabled;whatsAppButton.disabled=disabled}
       function shareMessage(action){return action+(isLocalShareUrl(shareUrl())?' El enlace es local y solo funciona en este equipo.':'')}
-      shareButton.hidden=!navigator.share;loadPublicConfig();
+      shareButton.hidden=!navigator.share;
+      if(API_BASE)loadPublicConfig();
+      else{button.disabled=true;showStatus('error','Backend no configurado','Falta MEDIAHUB_API_BASE. Configurá en Vercel la URL HTTPS de tu servicio de Render y volvé a desplegar.')}
       function secondsToTime(value){
         const total=Number(value);
         if(!Number.isFinite(total)||total<0)return 'Duración no disponible';
@@ -283,9 +290,10 @@
         card.classList.remove('downloading','complete','error');card.style.setProperty('--download-progress',percent+'%');card.classList.add(state);card.querySelector('.format-progress').textContent=state==='error'?'Error':percent+'%';
       }
       async function createJob(format,quality){
+        if(!API_BASE)throw new Error('El backend no está configurado. Volvé a desplegar con MEDIAHUB_API_BASE.');
         let response;
         try{response=await fetch(API_BASE+'/api/jobs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:currentMedia.sourceUrl,format:format==='audio'?'audio':'video',quality})})}
-        catch{throw new Error('No se pudo conectar con el backend local en '+API_BASE+'.')}
+        catch{throw new Error('No se pudo conectar con el servicio de descargas en '+API_BASE+'.')}
         if(!response.ok)throw new Error(await readError(response));
         return response.json();
       }

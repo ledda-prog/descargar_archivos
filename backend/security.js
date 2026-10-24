@@ -65,12 +65,13 @@ async function validatePublicUrl(input, { lookup = dns.lookup } = {}) {
   return url.toString();
 }
 
-function isAllowedOrigin(origin) {
+function isAllowedOrigin(origin, allowedOrigins = new Set()) {
   if (!origin) return true;
   try {
     const url = new URL(origin);
-    return ['http:', 'https:'].includes(url.protocol) &&
-      ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+    const isLocal = ['http:', 'https:'].includes(url.protocol) &&
+      ['localhost', '127.0.0.1', '[::1]', '::1'].includes(url.hostname.toLowerCase());
+    return isLocal || (url.protocol === 'https:' && url.origin === origin && allowedOrigins.has(url.origin));
   } catch {
     return false;
   }

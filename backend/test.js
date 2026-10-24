@@ -10,7 +10,7 @@ try {
   throw new Error(`No se pudo cargar backend/security.js: ${error.message}`);
 }
 
-const { contentDisposition, validatePublicUrl, isPrivateAddress } = security;
+const { contentDisposition, isAllowedOrigin, validatePublicUrl, isPrivateAddress } = security;
 const { cancelJob, isSupportedJsonPostPath, jobs, scheduleJobExpiry } = require('./server.js');
 const fs = require('node:fs/promises');
 const os = require('node:os');
@@ -22,7 +22,8 @@ const {
   estimateFormatBytes,
   isAllowedQuality,
 } = require('./formats.js');
-const { validatePublicBaseUrl } = require('./config.js');
+const { parseAllowedOrigins, resolveListenHost, validatePublicBaseUrl } = require('./config.js');
+const { validateApiBase } = require('../scripts/build-vercel.js');
 
 assert.equal(typeof validatePublicUrl, 'function', 'security.js debe exportar validatePublicUrl');
 assert.equal(typeof isPrivateAddress, 'function', 'security.js debe exportar isPrivateAddress');
@@ -211,10 +212,54 @@ test('PUBLIC_BASE_URL permite HTTPS y HTTP solo para desarrollo local', () => {
 test('config pública y compartir conservan servidor local y fallbacks visibles', async () => {
   const frontend = await fs.readFile(path.join(__dirname, '..', 'index.html'), 'utf8');
   const server = await fs.readFile(path.join(__dirname, 'server.js'), 'utf8');
-  assert.match(server, /const HOST = '127\.0\.0\.1'/);
+  assert.match(server, /const HOST = resolveListenHost\(\)/);
   assert.match(server, /pathname === '\/api\/config'/);
   assert.match(frontend, /publicBaseUrl\|\|location\.href/);
   assert.match(frontend, /id="copyLinkButton"/);
   assert.match(frontend, /id="whatsAppButton"/);
   assert.match(frontend, /solo funciona en este mismo equipo/);
+});
+
+test('host escucha local salvo Render o HOST explícito', () => {
+  assert.equal(resolveListenHost({}), '127.0.0.1');
+  assert.equal(resolveListenHost({ RENDER: 'true' }), '0.0.0.0');
+  assert.equal(resolveListenHost({ RENDER: 'false' }), '127.0.0.1');
+  assert.equal(resolveListenHost({ HOST: '192.0.2.10' }), '192.0.2.10');
+  assert.throws(() => resolveListenHost({ HOST: 'bad\nhost' }), /inválidos/);
+});
+
+test('CORS acepta localhost y orígenes HTTPS configurados exactamente', () => {
+  const allowed = parseAllowedOrigins('https://media-hub-umber.vercel.app, https://example.test');
+  assert.equal(isAllowedOrigin('http://localhost:3000', allowed), true);
+  assert.equal(isAllowedOrigin('https://127.0.0.1:4443', allowed), true);
+  assert.equal(isAllowedOrigin('https://media-hub-umber.vercel.app', allowed), true);
+  assert.equal(isAllowedOrigin('https://sub.media-hub-umber.vercel.app', allowed), false);
+  assert.equal(isAllowedOrigin('http://media-hub-umber.vercel.app', allowed), false);
+  assert.throws(() => parseAllowedOrigins('https://*.vercel.app'), /comodines/);
+  assert.throws(() => parseAllowedOrigins('http://example.test'), /HTTPS exactos/);
+});
+
+test('build de Vercel solo acepta backend HTTPS', () => {
+  assert.equal(validateApiBase(undefined), '');
+  assert.equal(validateApiBase('https://mediahub-backend.onrender.com/'), 'https://mediahub-backend.onrender.com');
+  assert.throws(() => validateApiBase('http://mediahub-backend.onrender.com'), /HTTPS/);
+  assert.throws(() => validateApiBase('https://user:pass@example.test'), /credenciales/);
+  assert.throws(() => validateApiBase('https://example.test/?token=secret'), /consulta/);
+});
+
+test('build de Vercel reemplaza solo index.html y no borra public recursivamente', async () => {
+  const buildScript = await fs.readFile(path.join(__dirname, '..', 'scripts', 'build-vercel.js'), 'utf8');
+  assert.doesNotMatch(buildScript, /fs\.rm\([^;]*recursive\s*:\s*true/);
+  assert.doesNotMatch(buildScript, /fs\.rm\(publicDir/);
+  assert.match(buildScript, /fs\.mkdir\(publicDir, \{ recursive: true \}\)/);
+  assert.match(buildScript, /fs\.rm\(outputPath, \{ force: true \}\)/);
+  assert.match(buildScript, /fs\.writeFile\(outputPath, output\)/);
+});
+
+test('frontend estático muestra errores de backend configurado o inaccesible', async () => {
+  const frontend = await fs.readFile(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.match(frontend, /MEDIAHUB_API_CONFIG/);
+  assert.match(frontend, /Backend no configurado/);
+  assert.match(frontend, /Backend no disponible/);
+  assert.match(frontend, /servicio de descargas/);
 });

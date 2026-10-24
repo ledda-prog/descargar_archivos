@@ -5,6 +5,7 @@
   "description": "Descargador local de contenido propio o autorizado",
   "scripts": {
     "start": "node backend/server.js",
+    "build": "node scripts/build-vercel.js",
     "test": "node --test backend/test.js"
   },
   "engines": {

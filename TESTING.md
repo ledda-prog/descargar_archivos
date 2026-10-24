@@ -6,9 +6,20 @@ Requisito: Node.js 20 o posterior.
 
 ```powershell
 node --test backend/test.js
+node --check backend/server.js
+node --check scripts/build-vercel.js
 ```
 
-Las pruebas no descargan contenido ni usan la red. Cubren validación, trabajos cancelables, formatos, fallback sin `Blob`, historial, configuración pública segura y fallbacks de compartir.
+Las pruebas no descargan contenido ni usan la red. Cubren validación, trabajos cancelables, formatos, fallback sin `Blob`, historial, host local/Render, CORS exacto, build HTTPS de Vercel, configuración pública segura y fallbacks de compartir.
+
+## Build estático
+
+```powershell
+$env:MEDIAHUB_API_BASE = 'https://mediahub-backend.onrender.com'
+npm run build
+```
+
+Comprobar que existe `public/index.html` y contiene la URL HTTPS indicada. También ejecutar sin la variable y confirmar que la página muestra **Backend no configurado**. No es necesario acceder a Internet para estas verificaciones.
 
 ## Smoke test manual
 
