@@ -1,0 +1,32 @@
+Quiero que diseñes e implementes una landing page funcional para un emprendimiento ficticio llamado MediaHub, un centro de descarga de contenido multimedia propio o autorizado desde enlaces públicos compatibles.
+
+Objetivo de la página:
+- Permitir que una persona pegue un enlace, consulte los datos del contenido y elija descargarlo como video MP4 o audio MP3.
+- Comunicar claramente que solo puede utilizarse con contenido propio, autorizado y sin eludir DRM, accesos privados ni condiciones de las plataformas.
+- Permitir elegir calidad o resolución, mostrar progreso, cancelar la operación, guardar el archivo y compartir el enlace de la página.
+
+Estructura básica:
+1. Encabezado con nombre del emprendimiento.
+2. Sección de inicio con propuesta de valor y formulario para pegar el enlace.
+3. Confirmación de permisos de uso.
+4. Resultado con miniatura, título, plataforma y duración.
+5. Selector de formato y calidad, tamaño estimado, progreso y acciones de descarga, cancelación y compartir.
+6. Sección de características o servicios.
+7. Historial local de descargas.
+8. Sección “Cómo funciona”.
+9. Aviso final de uso responsable.
+
+Estilo y tono:
+- Diseño moderno, tecnológico, amigable y profesional.
+- Paleta oscura con acentos turquesa, tarjetas redondeadas y tipografía legible.
+- Interfaz responsive para computadora y celular.
+- Estados claros de carga, éxito, error y cancelación, con accesibilidad básica.
+
+Requisitos técnicos:
+- Usar HTML, CSS y JavaScript.
+- Crear un backend local en JavaScript con Node.js para validar enlaces y procesar trabajos de descarga de forma segura.
+- Evitar scraping no autorizado, cookies privadas, bypass de autenticación o DRM.
+- Validar URLs, bloquear destinos locales o privados, limitar tamaño, duración y concurrencia, y eliminar archivos temporales.
+- Mantener el código organizado, documentado y fácil de ejecutar en Windows.
+- Incluir agent.md y memory.md con las instrucciones y decisiones del proyecto.
+- Ejecutar pruebas antes de finalizar y explicar brevemente cómo iniciar la aplicación.

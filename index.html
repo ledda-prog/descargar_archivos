@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="MediaHub: validá y prepará tus archivos multimedia de forma responsable." />
+  <title>MediaHub — Descargas con permiso</title>
+  <style>
+    :root{--bg:#07111f;--panel:#0d1b2d;--panel2:#122640;--line:#25415d;--text:#ecf5ff;--muted:#98acc4;--cyan:#61e6db;--violet:#a887ff;--danger:#ff9e9e;--ok:#9ef1c0}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 75% 5%,#1c3158 0,transparent 34%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}a{color:inherit}.wrap{max-width:1120px;margin:auto;padding:24px}.nav{display:flex;justify-content:space-between;align-items:center}.brand{display:flex;gap:10px;align-items:center;font-weight:800;letter-spacing:-.02em}.mark{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--cyan),var(--violet));display:grid;place-items:center;color:#07111f;font-weight:900}.nav small{color:var(--muted)}.hero{padding:88px 0 54px;max-width:780px}.eyebrow{color:var(--cyan);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12px}.hero h1{font-size:clamp(42px,7vw,76px);line-height:.98;letter-spacing:-.065em;margin:16px 0 22px}.hero p{color:var(--muted);font-size:19px;max-width:650px;margin:0}.card{background:linear-gradient(145deg,rgba(18,38,64,.9),rgba(13,27,45,.94));border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 80px #0004}.download{padding:26px;margin-top:18px}.formrow{display:flex;gap:10px}.input{flex:1;background:#081525;border:1px solid #2d4b69;border-radius:12px;color:var(--text);font-size:16px;padding:15px 16px;outline:none}.input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #61e6db22}.btn{border:0;border-radius:12px;padding:0 20px;font-weight:800;cursor:pointer;background:var(--cyan);color:#07111f;min-height:52px}.btn:hover{filter:brightness(1.06)}.btn:disabled{opacity:.5;cursor:not-allowed}.checks{display:flex;flex-wrap:wrap;gap:14px;margin:18px 0 0;color:var(--muted);font-size:13px}.checks label{display:flex;gap:8px;align-items:flex-start}.checks input{accent-color:var(--cyan);margin-top:4px}.status{display:none;margin-top:20px;border:1px solid var(--line);border-radius:15px;padding:16px;background:#081525}.status.show{display:block}.status h3{margin:0 0 4px;font-size:16px}.status p{margin:0;color:var(--muted)}.status.ok{border-color:#3f9f72}.status.warn{border-color:#8b6d48}.status.error{border-color:#9f4a4a}.spinner{display:inline-block;width:13px;height:13px;border:2px solid #ffffff44;border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;margin-right:7px}@keyframes spin{to{transform:rotate(360deg)}}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:24px 0 80px}.feature{padding:22px}.icon{font-size:24px}.feature h3{margin:14px 0 6px}.feature p{color:var(--muted);margin:0;font-size:14px}.section{padding:24px 0 80px}.section h2{font-size:32px;letter-spacing:-.04em;margin:0 0 18px}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.step{padding:20px;border-top:1px solid var(--line)}.num{color:var(--cyan);font-weight:800}.step p{color:var(--muted)}.legal{border-top:1px solid var(--line);padding:25px 0 8px;color:var(--muted);font-size:12px}.legal strong{color:var(--text)}@media(max-width:700px){.wrap{padding:18px}.hero{padding-top:62px}.formrow{flex-direction:column}.btn{width:100%}.grid,.steps{grid-template-columns:1fr}.hero h1{font-size:52px}}
+  </style>
+  <style>
+    .field-label{display:block;font-weight:700;margin-bottom:8px}.progress{display:none;height:4px;margin-top:14px;border-radius:5px;overflow:hidden;background:#19334c}.progress.show{display:block}.progress::after{content:"";display:block;width:38%;height:100%;background:var(--cyan);animation:loading 1.15s ease-in-out infinite}@keyframes loading{0%{transform:translateX(-110%)}100%{transform:translateX(300%)}}.result{display:none;margin-top:20px;grid-template-columns:170px 1fr;gap:20px;align-items:start}.result.show{display:grid}.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:13px;background:#081525;border:1px solid var(--line)}.meta h2{font-size:21px;margin:0 0 7px;line-height:1.25}.facts{display:flex;gap:8px;flex-wrap:wrap;color:var(--muted);font-size:13px}.pill{padding:4px 9px;border-radius:99px;background:#172f49;border:1px solid #315573}.formats{border:0;padding:0;margin:18px 0 0}.formats legend{font-weight:800;margin-bottom:9px}.choices{display:flex;gap:10px}.choice{flex:1;position:relative}.choice input{position:absolute;opacity:0}.choice span{display:block;border:1px solid #315573;border-radius:12px;padding:12px;background:#081525;cursor:pointer}.choice input:checked+span{border-color:var(--cyan);box-shadow:0 0 0 2px #61e6db22}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}#shareHint{display:block;margin-top:8px}.btn.secondary{background:#223b56;color:var(--text);border:1px solid #3c5b77}.muted{color:var(--muted)}@media(max-width:700px){.actions,.choices{flex-direction:column}.result.show{grid-template-columns:1fr}.thumb{max-width:330px}}
+  </style>
+  <style>
+    .choice>span{--download-progress:0%;position:relative;overflow:hidden;isolation:isolate;transition:border-color .25s ease,box-shadow .25s ease,transform .25s ease}.choice>span::before{content:"";position:absolute;inset:0 auto 0 0;width:var(--download-progress);z-index:0;opacity:0;background:linear-gradient(90deg,rgba(97,230,219,.18),rgba(168,135,255,.34),rgba(97,230,219,.24));box-shadow:10px 0 28px rgba(97,230,219,.28);transition:width .55s cubic-bezier(.2,.8,.2,1),opacity .25s ease}.choice>span.downloading::before,.choice>span.complete::before{opacity:1}.choice>span.downloading{border-color:var(--cyan);box-shadow:0 0 0 2px #61e6db22,0 10px 30px #0003}.choice>span.complete{border-color:var(--ok)}.choice>span.error{border-color:var(--danger)}.choice>span strong,.choice>span small,.choice>span .format-progress{position:relative;z-index:1}.format-progress{position:absolute!important;right:13px;top:11px;font-weight:900;color:var(--cyan);opacity:0;transform:translateY(3px);transition:.25s ease}.choice>span.downloading .format-progress,.choice>span.complete .format-progress,.choice>span.error .format-progress{opacity:1;transform:none}.choice>span.downloading .format-progress::after{content:"";display:inline-block;width:7px;height:7px;margin-left:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 0 rgba(97,230,219,.5);animation:pulse 1.4s infinite}@keyframes pulse{70%{box-shadow:0 0 0 9px rgba(97,230,219,0)}100%{box-shadow:0 0 0 0 rgba(97,230,219,0)}}
+  </style>
+  <style>
+    .quality-control{display:grid;grid-template-columns:1fr auto;gap:5px 14px;align-items:center;margin-top:14px;padding:13px 14px;border:1px solid #315573;border-radius:12px;background:#081525}.quality-control label{font-weight:800}.quality-control select{min-width:150px;border:1px solid #3c5b77;border-radius:9px;background:#122640;color:var(--text);padding:9px 34px 9px 11px;font:inherit;cursor:pointer}.quality-control small{grid-column:1/-1;color:var(--muted)}@media(max-width:520px){.quality-control{grid-template-columns:1fr}.quality-control select{width:100%}}
+  </style>
+  <style>
+    .history{padding:0 0 80px}.history-head{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:16px}.history-head h2{margin:0;font-size:32px;letter-spacing:-.04em}.history-list{display:grid;gap:10px;list-style:none;margin:0;padding:0}.history-item{display:grid;grid-template-columns:1fr auto;gap:12px 20px;padding:17px 18px}.history-title{font-weight:800;margin:0 0 5px;overflow-wrap:anywhere}.history-meta,.history-url{color:var(--muted);font-size:13px;overflow-wrap:anywhere}.history-actions{display:flex;gap:8px;align-items:center}.history-actions .btn,.history-head .btn{min-height:40px;padding:0 14px}.history-empty{margin:0;padding:20px;color:var(--muted);text-align:center}.history-result{color:var(--ok);font-weight:700}@media(max-width:700px){.history-head{align-items:flex-start;flex-direction:column}.history-head .btn{width:auto}.history-item{grid-template-columns:1fr}.history-actions{flex-wrap:wrap}.history-actions .btn{width:auto;flex:1}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="nav"><div class="brand"><span class="mark">M</span> MediaHub</div><small>Descargas con permiso</small></nav>
+    <main>
+      <section class="hero">
+        <div class="eyebrow">Centro multimedia responsable</div>
+        <h1>Del sitio.<br><span style="color:var(--cyan)">Al disco.</span></h1>
+        <p>Pegá un enlace público compatible, consultá sus datos y guardá el contenido propio o autorizado en tu dispositivo.</p>
+        <div class="card download">
+          <form id="downloadForm" novalidate>
+            <label class="field-label" for="url">Enlace del contenido</label>
+            <div class="formrow"><input id="url" class="input" type="url" inputmode="url" autocomplete="url" placeholder="https://sitio.com/publicacion/..." required><button class="btn" id="submit" type="submit">Consultar</button></div>
+            <div class="checks"><label><input id="permission" type="checkbox" required> Confirmo que el contenido es mío o que tengo permiso para descargarlo.</label></div>
+          </form>
+          <div id="status" class="status" role="status" aria-live="polite" aria-atomic="true"></div>
+          <div id="progress" class="progress" role="progressbar" aria-label="Procesando" aria-valuetext="En curso"></div>
+          <section id="result" class="result" aria-labelledby="mediaTitle">
+            <img id="thumbnail" class="thumb" alt="Miniatura del contenido" hidden>
+            <div class="meta">
+              <h2 id="mediaTitle"></h2>
+              <div class="facts"><span id="platform" class="pill"></span><span id="duration" class="pill"></span></div>
+              <fieldset class="formats"><legend>Formato de descarga</legend><div class="choices">
+                <label class="choice"><input type="radio" name="format" value="video" checked><span><strong>Video MP4</strong><output class="format-progress">0%</output><br><small class="muted">Video y audio</small></span></label>
+                <label class="choice"><input type="radio" name="format" value="audio"><span><strong>Audio MP3</strong><output class="format-progress">0%</output><br><small class="muted">Solo audio</small></span></label>
+              </div></fieldset>
+              <div class="quality-control"><label id="qualityLabel" for="quality">Resolución del video</label><select id="quality" aria-labelledby="qualityLabel"></select><small id="qualityHint">Seleccioná una opción para ver su tamaño estimado.</small></div>
+              <div class="actions"><button class="btn" id="downloadButton" type="button">Descargar</button><button class="btn secondary" id="cancelButton" type="button" hidden>Cancelar</button><button class="btn secondary" id="shareButton" type="button" disabled>Compartir</button><button class="btn secondary" id="copyLinkButton" type="button" disabled>Copiar enlace</button><button class="btn secondary" id="whatsAppButton" type="button" disabled>WhatsApp</button></div>
+              <small id="shareHint" class="muted" aria-live="polite"></small>
+            </div>
+          </section>
+        </div>
+      </section>
+      <section class="grid" aria-label="Características">
+        <article class="card feature"><div class="icon">✦</div><h3>Consultá primero</h3><p>El backend valida el enlace y muestra título, plataforma, miniatura y duración.</p></article>
+        <article class="card feature"><div class="icon">⇩</div><h3>Elegí cómo guardar</h3><p>Descargá video MP4 o audio MP3 usando el selector disponible en tu navegador.</p></article>
+        <article class="card feature"><div class="icon">⌁</div><h3>Compartí fácil</h3><p>Compartí o copiá el enlace de MediaHub, también mediante WhatsApp.</p></article>
+      </section>
+      <section class="history" aria-labelledby="historyTitle">
+        <div class="history-head"><div><h2 id="historyTitle">Historial local</h2><small class="muted">Solo guarda datos básicos en este navegador.</small></div><button class="btn secondary" id="clearHistoryButton" type="button">Borrar historial</button></div>
+        <ol id="historyList" class="history-list" aria-live="polite"></ol>
+        <p id="historyEmpty" class="card history-empty">Todavía no hay descargas registradas.</p>
+      </section>
+      <section class="section"><h2>Cómo funciona</h2><div class="steps"><div class="step"><div class="num">01 / Pegá</div><p>Ingresá un enlace público y confirmá que tenés derechos o permiso.</p></div><div class="step"><div class="num">02 / Consultá</div><p>Revisá los datos detectados y elegí video o audio.</p></div><div class="step"><div class="num">03 / Guardá</div><p>Elegí una ubicación si tu navegador lo permite y compartí desde tu dispositivo.</p></div></div></section>
+    </main>
+    <footer class="legal"><strong>Uso responsable:</strong> MediaHub no descarga ni ayuda a eludir controles de acceso, DRM o restricciones de las plataformas. Usalo solo con contenido propio, con permiso explícito o mediante integraciones oficialmente soportadas.</footer>
+  </div>
+  <script>
+    (() => {
+      'use strict';
+      const API_BASE=(window.MEDIAHUB_API_BASE||(location.protocol==='http:'||location.protocol==='https:'?location.origin:'http://127.0.0.1:3000')).replace(/\/$/,'');
+      const $=selector=>document.querySelector(selector);
+      const form=$('#downloadForm'),urlInput=$('#url'),permission=$('#permission'),button=$('#submit'),downloadButton=$('#downloadButton'),cancelButton=$('#cancelButton'),shareButton=$('#shareButton'),copyLinkButton=$('#copyLinkButton'),whatsAppButton=$('#whatsAppButton'),shareHint=$('#shareHint'),statusBox=$('#status'),progress=$('#progress'),result=$('#result'),thumbnail=$('#thumbnail'),mediaTitle=$('#mediaTitle'),platform=$('#platform'),duration=$('#duration'),qualitySelect=$('#quality'),qualityLabel=$('#qualityLabel'),qualityHint=$('#qualityHint'),historyList=$('#historyList'),historyEmpty=$('#historyEmpty'),clearHistoryButton=$('#clearHistoryButton');
+      const HISTORY_KEY='mediahub.downloadHistory.v1',HISTORY_LIMIT=20;
+      let currentMedia=null,visualProgress=0,progressFormat=null,activeJobId=null,cancelRequested=false,pendingRetry=null,historyStorageAvailable=true,publicBaseUrl=null;
+
+      function normalizeHistoryEntry(entry){
+        if(!entry||typeof entry!=='object')return null;
+        const sourceUrl=String(entry.sourceUrl||'');
+        try{if(!['http:','https:'].includes(new URL(sourceUrl).protocol))return null}catch{return null}
+        const format=entry.format==='video'?'video':entry.format==='audio'?'audio':null,resultValue=['started','saved'].includes(entry.result)?entry.result:null;
+        if(!format||!resultValue)return null;
+        return {id:String(entry.id||''),title:String(entry.title||'Contenido sin título').slice(0,180),sourceUrl:sourceUrl.slice(0,2000),platform:String(entry.platform||'Sitio').slice(0,80),format,quality:String(entry.quality||'best').slice(0,20),date:String(entry.date||''),result:resultValue};
+      }
+      function readHistory(){
+        let raw;
+        try{raw=localStorage.getItem(HISTORY_KEY);historyStorageAvailable=true}
+        catch{historyStorageAvailable=false;return []}
+        if(!raw)return [];
+        try{
+          const parsed=JSON.parse(raw);if(!Array.isArray(parsed))throw new Error('Historial inválido');
+          return parsed.map(normalizeHistoryEntry).filter(Boolean).slice(0,HISTORY_LIMIT);
+        }catch{
+          try{localStorage.removeItem(HISTORY_KEY);historyStorageAvailable=true}catch{historyStorageAvailable=false}
+          return [];
+        }
+      }
+      function writeHistory(entries){
+        try{localStorage.setItem(HISTORY_KEY,JSON.stringify(entries.slice(0,HISTORY_LIMIT)));historyStorageAvailable=true;return true}
+        catch{historyStorageAvailable=false;return false}
+      }
+      function historyDate(value){
+        const date=new Date(value);return Number.isNaN(date.getTime())?'Fecha no disponible':date.toLocaleString('es-AR',{dateStyle:'short',timeStyle:'short'});
+      }
+      function qualityText(entry){return entry.format==='audio'?entry.quality+' kbps':entry.quality==='best'?'Mejor disponible':entry.quality+'p'}
+      function renderHistory(){
+        const entries=readHistory();historyList.replaceChildren();
+        for(const entry of entries){
+          const item=document.createElement('li');item.className='card history-item';item.dataset.historyId=entry.id;
+          const info=document.createElement('div'),title=document.createElement('p'),meta=document.createElement('div'),source=document.createElement('div'),actions=document.createElement('div'),retry=document.createElement('button'),remove=document.createElement('button');
+          title.className='history-title';title.textContent=entry.title;
+          meta.className='history-meta';meta.textContent=entry.platform+' · '+(entry.format==='audio'?'Audio MP3':'Video MP4')+' · '+qualityText(entry)+' · '+historyDate(entry.date)+' · ';
+          const outcome=document.createElement('span');outcome.className='history-result';outcome.textContent=entry.result==='saved'?'Guardado':'Iniciado';meta.appendChild(outcome);
+          source.className='history-url';source.textContent=entry.sourceUrl;
+          info.append(title,meta,source);actions.className='history-actions';
+          retry.className='btn secondary';retry.type='button';retry.dataset.action='retry';retry.textContent='Reintentar';retry.setAttribute('aria-label','Reintentar '+entry.title);
+          remove.className='btn secondary';remove.type='button';remove.dataset.action='delete';remove.textContent='Eliminar';remove.setAttribute('aria-label','Eliminar '+entry.title+' del historial');
+          actions.append(retry,remove);item.append(info,actions);historyList.appendChild(item);
+        }
+        historyEmpty.hidden=entries.length>0;clearHistoryButton.disabled=entries.length===0||!historyStorageAvailable;
+        if(!historyStorageAvailable){historyEmpty.hidden=false;historyEmpty.textContent='El historial no está disponible en este navegador.'}
+        else historyEmpty.textContent='Todavía no hay descargas registradas.';
+      }
+      function addHistoryEntry(entry){
+        const normalized=normalizeHistoryEntry({...entry,id:Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8)});if(!normalized)return;
+        const duplicateKey=item=>item.sourceUrl+'\n'+item.format+'\n'+item.quality;
+        const entries=readHistory().filter(item=>duplicateKey(item)!==duplicateKey(normalized));
+        writeHistory([normalized,...entries]);renderHistory();
+      }
+      renderHistory();
+
+      historyList.addEventListener('click',event=>{
+        const action=event.target.closest('button[data-action]'),item=event.target.closest('[data-history-id]');
+        if(!action||!item)return;
+        const entries=readHistory(),entry=entries.find(candidate=>candidate.id===item.dataset.historyId);if(!entry)return;
+        if(action.dataset.action==='delete'){writeHistory(entries.filter(candidate=>candidate.id!==entry.id));renderHistory();return}
+        pendingRetry={format:entry.format,quality:entry.quality};currentMedia=null;permission.checked=false;urlInput.value=entry.sourceUrl;
+        const formatInput=document.querySelector('input[name="format"][value="'+entry.format+'"]');if(formatInput)formatInput.checked=true;
+        result.classList.remove('show');setShareDisabled(true);resetFormatProgress();updateQualityOptions();
+        showStatus('warn','Listo para reintentar','Revisá el enlace, confirmá nuevamente el permiso y pulsá Consultar. No se inició ninguna descarga.');
+        form.scrollIntoView({behavior:'smooth',block:'center'});urlInput.focus();
+      });
+      clearHistoryButton.addEventListener('click',()=>{
+        if(!confirm('¿Borrar todo el historial local de MediaHub?'))return;
+        try{localStorage.removeItem(HISTORY_KEY);historyStorageAvailable=true}catch{historyStorageAvailable=false}
+        renderHistory();
+      });
+
+      function formatBytes(value){
+        const bytes=Number(value);
+        if(!Number.isFinite(bytes)||bytes<=0)return 'tamaño no disponible';
+        const units=['B','KB','MB','GB'];let amount=bytes,index=0;
+        while(amount>=1024&&index<units.length-1){amount/=1024;index++}
+        return new Intl.NumberFormat('es-AR',{maximumFractionDigits:1}).format(amount)+' '+units[index];
+      }
+      function updateQualityHint(){
+        const format=document.querySelector('input[name="format"]:checked').value,option=qualitySelect.selectedOptions[0];
+        if(!option)return;
+        const prefix=format==='audio'?'Calidad':'Resolución';
+        qualityHint.textContent=prefix+': '+option.dataset.label+' · Tamaño estimado: '+formatBytes(option.dataset.size)+'.';
+      }
+      function updateQualityOptions(){
+        const format=document.querySelector('input[name="format"]:checked').value;
+        let options=format==='audio'?(currentMedia?.audioOptions||[]):(currentMedia?.videoOptions||[]);
+        if(format==='video')options=[...options,{quality:'best',label:'Mejor disponible',estimated_size:currentMedia?.bestVideoEstimatedSize||null}];
+        qualitySelect.replaceChildren(...options.map(item=>{const option=document.createElement('option');option.value=item.quality;option.dataset.label=item.label;option.dataset.size=item.estimated_size||'';option.textContent=item.label+' · '+formatBytes(item.estimated_size);return option}));
+        const preferred=format==='audio'?'192':'720',preferredOption=[...qualitySelect.options].find(option=>option.value===preferred);
+        if(preferredOption)preferredOption.selected=true;
+        else if(format==='video'&&qualitySelect.options.length>1)qualitySelect.options[qualitySelect.options.length-2].selected=true;
+        qualityLabel.textContent=format==='audio'?'Calidad del audio':'Resolución del video';
+        updateQualityHint();
+      }
+      document.querySelectorAll('input[name="format"]').forEach(input=>input.addEventListener('change',()=>{updateQualityOptions();resetFormatProgress()}));
+      qualitySelect.addEventListener('change',updateQualityHint);
+      updateQualityOptions();
+
+      function setBusy(busy,message){
+        button.disabled=busy;
+        downloadButton.disabled=busy;
+        progress.classList.toggle('show',busy);
+        progress.setAttribute('aria-valuetext',message||(busy?'En curso':'Finalizado'));
+      }
+      function showStatus(kind,title,message){
+        statusBox.className='status show '+(kind||'');
+        statusBox.replaceChildren();
+        const heading=document.createElement('h3'),text=document.createElement('p');
+        heading.textContent=title;text.textContent=message;statusBox.append(heading,text);
+      }
+      function validatePublicUrl(raw){
+        let parsed;
+        try{parsed=new URL(raw)}catch{throw new Error('Ingresá un enlace completo y válido.')}
+        if(!['http:','https:'].includes(parsed.protocol))throw new Error('El enlace debe comenzar con http:// o https://.');
+        if(parsed.username||parsed.password)throw new Error('El enlace no puede incluir credenciales.');
+        const host=parsed.hostname.toLowerCase();
+        const blocked=/^(localhost|0\.0\.0\.0|127\.|10\.|192\.168\.|169\.254\.|::1$)/.test(host)||/^172\.(1[6-9]|2\d|3[01])\./.test(host);
+        if(blocked)throw new Error('Usá un enlace público, no una dirección local o privada.');
+        return parsed.href;
+      }
+      async function readError(response){
+        try{const data=await response.json();return data.detail||data.error||data.message||('Error '+response.status)}
+        catch{return 'El servidor respondió con error '+response.status+'.'}
+      }
+      async function requestJson(path,options={}){
+        let response;
+        try{response=await fetch(API_BASE+path,options)}
+        catch{throw new Error('No se pudo conectar con el backend local en '+API_BASE+'. Verificá que esté iniciado y permita CORS.')}
+        if(!response.ok)throw new Error(await readError(response));
+        return response.json();
+      }
+      function shareUrl(){return publicBaseUrl||location.href.split('#')[0]}
+      function isLocalShareUrl(value){
+        try{return ['localhost','127.0.0.1','::1','[::1]'].includes(new URL(value).hostname.toLowerCase())}catch{return true}
+      }
+      function updateShareHint(){
+        const value=shareUrl();
+        shareHint.textContent=isLocalShareUrl(value)
+          ? 'Enlace local: solo funciona en este mismo equipo. Configurá PUBLIC_BASE_URL para compartirlo con otras personas.'
+          : 'Se compartirá: '+value;
+      }
+      async function loadPublicConfig(){
+        try{const config=await requestJson('/api/config',{cache:'no-store'});publicBaseUrl=typeof config.public_base_url==='string'?config.public_base_url:null}catch{publicBaseUrl=null}
+        updateShareHint();
+      }
+      async function copyText(value){
+        if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(value);return}
+        const field=document.createElement('textarea');field.value=value;field.readOnly=true;field.style.position='fixed';field.style.opacity='0';document.body.appendChild(field);field.select();
+        const copied=document.execCommand('copy');field.remove();if(!copied)throw new Error('El navegador no permitió copiar el enlace.');
+      }
+      function setShareDisabled(disabled){shareButton.disabled=disabled;copyLinkButton.disabled=disabled;whatsAppButton.disabled=disabled}
+      function shareMessage(action){return action+(isLocalShareUrl(shareUrl())?' El enlace es local y solo funciona en este equipo.':'')}
+      shareButton.hidden=!navigator.share;loadPublicConfig();
+      function secondsToTime(value){
+        const total=Number(value);
+        if(!Number.isFinite(total)||total<0)return 'Duración no disponible';
+        const h=Math.floor(total/3600),m=Math.floor((total%3600)/60),s=Math.floor(total%60);
+        return h?h+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'):m+':'+String(s).padStart(2,'0');
+      }
+      function safeThumbnail(value){
+        try{const parsed=new URL(value);return ['http:','https:'].includes(parsed.protocol)?parsed.href:''}catch{return ''}
+      }
+      function renderMedia(data,sourceUrl){
+        currentMedia={sourceUrl:sourceUrl,title:data.title||data.name||'Contenido sin título',platform:data.platform||data.provider||new URL(sourceUrl).hostname,duration:data.duration??data.duration_seconds,thumbnail:data.thumbnail_url||data.thumbnail||'',videoOptions:Array.isArray(data.video_options)?data.video_options:[],audioOptions:Array.isArray(data.audio_options)?data.audio_options:[],bestVideoEstimatedSize:data.best_video_estimated_size||null};
+        mediaTitle.textContent=currentMedia.title;
+        platform.textContent=currentMedia.platform;
+        duration.textContent=typeof currentMedia.duration==='string'?currentMedia.duration:secondsToTime(currentMedia.duration);
+        const thumbUrl=safeThumbnail(currentMedia.thumbnail);
+        thumbnail.hidden=!thumbUrl;
+        if(thumbUrl)thumbnail.src=thumbUrl;else thumbnail.removeAttribute('src');
+        updateQualityOptions();
+        if(pendingRetry){const retryOption=[...qualitySelect.options].find(option=>option.value===pendingRetry.quality);if(retryOption)retryOption.selected=true;updateQualityHint();pendingRetry=null}
+        result.classList.add('show');setShareDisabled(false);updateShareHint();
+      }
+
+      form.addEventListener('submit',async event=>{
+        event.preventDefault();result.classList.remove('show');setShareDisabled(true);resetFormatProgress();
+        try{
+          if(!permission.checked)throw new Error('Confirmá que el contenido es tuyo o que tenés permiso para descargarlo.');
+          const sourceUrl=validatePublicUrl(urlInput.value.trim());
+          setBusy(true,'Consultando contenido');
+          showStatus('','Consultando enlace…','El backend está validando el sitio y recuperando sus datos.');
+          const data=await requestJson('/api/info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:sourceUrl})});
+          renderMedia(data,sourceUrl);
+          showStatus('ok','Contenido listo','Revisá los datos, elegí el formato y descargá.');
+        }catch(error){showStatus('error','No se pudo consultar',error.message||'Ocurrió un error inesperado.')}
+        finally{setBusy(false)}
+      });
+
+      function resetFormatProgress(){
+        visualProgress=0;progressFormat=null;
+        document.querySelectorAll('.choice>span').forEach(card=>{card.classList.remove('downloading','complete','error');card.style.setProperty('--download-progress','0%');card.querySelector('.format-progress').textContent='0%'});
+      }
+      function updateFormatProgress(format,value,state='downloading'){
+        if(progressFormat!==format){resetFormatProgress();progressFormat=format}
+        const input=document.querySelector(`input[name="format"][value="${format}"]`),card=input?.nextElementSibling;
+        if(!card)return;
+        const target=Math.max(0,Math.min(100,Number(value)||0));
+        if(state==='complete')visualProgress=100;
+        else if(state!=='error'&&target>visualProgress)visualProgress=Math.min(target,visualProgress+Math.max(1,Math.ceil((target-visualProgress)*.22)));
+        else if(state==='downloading'&&target===0&&visualProgress<12)visualProgress+=1;
+        const percent=Math.round(visualProgress);
+        card.classList.remove('downloading','complete','error');card.style.setProperty('--download-progress',percent+'%');card.classList.add(state);card.querySelector('.format-progress').textContent=state==='error'?'Error':percent+'%';
+      }
+      async function createJob(format,quality){
+        let response;
+        try{response=await fetch(API_BASE+'/api/jobs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:currentMedia.sourceUrl,format:format==='audio'?'audio':'video',quality})})}
+        catch{throw new Error('No se pudo conectar con el backend local en '+API_BASE+'.')}
+        if(!response.ok)throw new Error(await readError(response));
+        return response.json();
+      }
+      async function waitForJob(job,format){
+        const deadline=Date.now()+10*60*1000;
+        while(Date.now()<deadline){
+          const current=await requestJson('/api/jobs/'+encodeURIComponent(job.id),{cache:'no-store'});
+          updateFormatProgress(format,current.progress,current.status==='failed'?'error':current.status==='ready'?'complete':'downloading');
+          showStatus(current.status==='failed'?'error':'','Descargando…',current.stage||('Progreso: '+Math.round(current.progress||0)+'%'));
+          if(current.status==='ready')return current;
+          if(current.status==='failed')throw new Error(current.error||'No se pudo completar la descarga.');
+          if(current.status==='cancelled')throw new DOMException('Descarga cancelada','AbortError');
+          await new Promise(resolve=>setTimeout(resolve,650));
+        }
+        throw new Error('La descarga tardó demasiado. Intentá nuevamente.');
+      }
+      function safeFilename(title,extension){
+        const base=title.normalize('NFKD').replace(/[\\/:*?"<>|\u0000-\u001f]/g,'').trim().slice(0,100)||'mediahub';
+        return base+'.'+extension;
+      }
+      async function chooseSaveHandle(filename,mime){
+        if('showSaveFilePicker' in window){
+          const extension='.'+filename.split('.').pop();
+          return window.showSaveFilePicker({suggestedName:filename,types:[{description:mime.startsWith('audio/')?'Audio MP3':'Video MP4',accept:{[mime]:[extension]}}]});
+        }
+        return null;
+      }
+      function jobFileUrl(job){return API_BASE+'/api/jobs/'+encodeURIComponent(job.id)+'/file'}
+      function startNativeJobDownload(job){
+        const link=document.createElement('a');
+        link.href=jobFileUrl(job);link.hidden=true;document.body.appendChild(link);link.click();link.remove();
+      }
+      async function saveJobFile(job,handle){
+        if(!handle){startNativeJobDownload(job);return 'started'}
+        const response=await fetch(jobFileUrl(job));
+        if(!response.ok)throw new Error(await readError(response));
+        if(!response.body)throw new Error('El navegador no permite transmitir este archivo.');
+        const writable=await handle.createWritable();await response.body.pipeTo(writable);return 'saved';
+      }
+      cancelButton.addEventListener('click',async()=>{
+        if(!activeJobId)return;
+        cancelRequested=true;cancelButton.disabled=true;
+        showStatus('warn','Cancelando descarga…','Se están deteniendo los procesos y limpiando los archivos temporales.');
+        try{
+          const response=await fetch(API_BASE+'/api/jobs/'+encodeURIComponent(activeJobId),{method:'DELETE'});
+          if(!response.ok&&response.status!==404)throw new Error(await readError(response));
+        }catch(error){showStatus('error','No se pudo cancelar',error.message||'Intentá nuevamente.');cancelRequested=false;cancelButton.disabled=false}
+      });
+      downloadButton.addEventListener('click',async()=>{
+        if(!currentMedia)return;
+        const format=document.querySelector('input[name="format"]:checked').value;
+        const quality=qualitySelect.value,extension=format==='audio'?'mp3':'mp4',mime=format==='audio'?'audio/mpeg':'video/mp4',filename=safeFilename(currentMedia.title,extension);
+        try{
+          const handle=await chooseSaveHandle(filename,mime);
+          setBusy(true,'Preparando descarga');
+          updateFormatProgress(format,1,'downloading');
+          showStatus('','Preparando descarga…','Podés seguir el porcentaje en el formato seleccionado.');
+          const created=await createJob(format,quality);activeJobId=created.id;cancelRequested=false;cancelButton.hidden=false;cancelButton.disabled=false;
+          const job=await waitForJob(created,format);
+          const saveResult=await saveJobFile(job,handle);
+          updateFormatProgress(format,100,'complete');
+          addHistoryEntry({title:currentMedia.title,sourceUrl:currentMedia.sourceUrl,platform:currentMedia.platform,format,quality,date:new Date().toISOString(),result:saveResult});
+          if(saveResult==='saved')showStatus('ok','Archivo guardado','La transferencia al destino elegido finalizó correctamente.');
+          else showStatus('ok','Descarga iniciada','El navegador comenzó la transferencia y mostrará su progreso en el gestor de descargas.');
+        }catch(error){
+          if(cancelRequested){resetFormatProgress();showStatus('warn','Descarga cancelada','Los procesos se detuvieron y los archivos temporales se eliminaron.');}
+          else if(error.name==='AbortError')showStatus('warn','Guardado cancelado','No se inició ninguna descarga.');
+          else{updateFormatProgress(format,0,'error');showStatus('error','No se pudo descargar',error.message||'Ocurrió un error inesperado.')}
+        }finally{activeJobId=null;cancelRequested=false;cancelButton.hidden=true;cancelButton.disabled=false;setBusy(false)}
+      });
+      shareButton.addEventListener('click',async()=>{
+        const pageUrl=shareUrl(),shareData={title:'MediaHub',text:'Descargá contenido multimedia propio o autorizado con MediaHub.',url:pageUrl};
+        try{
+          await navigator.share(shareData);showStatus(isLocalShareUrl(pageUrl)?'warn':'ok','Compartido',shareMessage('Se compartió el enlace de MediaHub.'));
+        }catch(error){if(error.name!=='AbortError')showStatus('error','No se pudo compartir',error.message||'Intentá nuevamente.')}
+      });
+      copyLinkButton.addEventListener('click',async()=>{
+        try{await copyText(shareUrl());showStatus(isLocalShareUrl(shareUrl())?'warn':'ok','Enlace copiado',shareMessage('El enlace quedó copiado.'))}
+        catch(error){showStatus('error','No se pudo copiar',error.message||'Copiá el enlace desde la barra del navegador.')}
+      });
+      whatsAppButton.addEventListener('click',()=>{
+        const pageUrl=shareUrl(),message='MediaHub: '+pageUrl;window.open('https://wa.me/?text='+encodeURIComponent(message),'_blank','noopener,noreferrer');
+        showStatus(isLocalShareUrl(pageUrl)?'warn':'ok','WhatsApp abierto',shareMessage('Se preparó el enlace de MediaHub para compartir.'));
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "mediahub-local",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Descargador local de contenido propio o autorizado",
+  "scripts": {
+    "start": "node backend/server.js",
+    "test": "node --test backend/test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
