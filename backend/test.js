@@ -194,14 +194,16 @@ test('el historial es local, limitado y reintentar no da consentimiento ni inici
   assert.match(frontend, /sourceUrl:currentMedia\.sourceUrl,platform:currentMedia\.platform,format,quality,date:/);
 });
 
-test('el historial normaliza y reintenta video con el valor real del radio', async () => {
+test('el historial normaliza y reintenta el formato real en la tabla', async () => {
   const frontend = await fs.readFile(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.match(frontend, /entry\.format==='video'\?'video':entry\.format==='audio'\?'audio':null/);
   assert.doesNotMatch(frontend, /entry\.format==='mp4'\?'mp4'/);
   assert.match(frontend, /entry\.format==='audio'\?'Audio MP3':'Video MP4'/);
-  assert.match(frontend, /input\[name="format"\]\[value="'\+entry\.format\+'"\]/);
+  assert.match(frontend, /activeFormat=entry\.format;updateFormatTabs\(\)/);
   assert.match(frontend, /addHistoryEntry\(\{title:currentMedia\.title,[^}]*format,quality,/);
-  assert.match(frontend, /name="format" value="video"/);
+  assert.match(frontend, /data-format="video"/);
+  assert.match(frontend, /data-format="audio"/);
+  assert.match(frontend, /dataset\.downloadFormat/);
 });
 
 test('PUBLIC_BASE_URL permite HTTPS y HTTP solo para desarrollo local', () => {
