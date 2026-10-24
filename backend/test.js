@@ -11,7 +11,7 @@ try {
 }
 
 const { contentDisposition, isAllowedOrigin, validatePublicUrl, isPrivateAddress } = security;
-const { cancelJob, isSupportedJsonPostPath, jobs, scheduleJobExpiry } = require('./server.js');
+const { cancelJob, isSupportedJsonPostPath, jobs, publicExtractorError, scheduleJobExpiry } = require('./server.js');
 const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
@@ -106,6 +106,13 @@ test('retira la ruta directa y conserva solo los POST soportados', () => {
   assert.equal(isSupportedJsonPostPath('/api/info'), true);
   assert.equal(isSupportedJsonPostPath('/api/jobs'), true);
   assert.equal(isSupportedJsonPostPath('/api/download'), false);
+});
+
+test('traduce el bloqueo anti-bot de YouTube sin sugerir cookies ni reintentos falsos', () => {
+  const message = publicExtractorError("ERROR: Sign in to confirm you’re not a bot. Use --cookies-from-browser");
+  assert.match(message, /YouTube rechazó/);
+  assert.doesNotMatch(message, /cookies|Esperá unos minutos/i);
+  assert.equal(publicExtractorError('Fallo genérico'), 'Fallo genérico');
 });
 
 test('cancela un trabajo activo mediante AbortController', () => {
@@ -254,6 +261,21 @@ test('build de Vercel reemplaza solo index.html y no borra public recursivamente
   assert.match(buildScript, /fs\.mkdir\(publicDir, \{ recursive: true \}\)/);
   assert.match(buildScript, /fs\.rm\(outputPath, \{ force: true \}\)/);
   assert.match(buildScript, /fs\.writeFile\(outputPath, output\)/);
+  assert.match(buildScript, /manifest\.webmanifest/);
+  assert.match(buildScript, /\['assets', 'demo'\]/);
+});
+
+test('PWA instala solo el shell y nunca cachea API ni descargas', async () => {
+  const manifest = JSON.parse(await fs.readFile(path.join(__dirname, '..', 'manifest.webmanifest'), 'utf8'));
+  const worker = await fs.readFile(path.join(__dirname, '..', 'sw.js'), 'utf8');
+  const frontend = await fs.readFile(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.equal(manifest.display, 'standalone');
+  assert.equal(manifest.start_url, '/');
+  assert.match(worker, /startsWith\("\/api\/"\)/);
+  assert.match(worker, /request\.mode === "navigate"/);
+  assert.doesNotMatch(worker, /cache\.put/);
+  assert.match(frontend, /beforeinstallprompt/);
+  assert.match(frontend, /demo\/mediahub-demo\.mp4/);
 });
 
 test('frontend estático muestra errores de backend configurado o inaccesible', async () => {

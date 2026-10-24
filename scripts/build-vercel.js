@@ -27,6 +27,12 @@ async function build() {
   await fs.mkdir(publicDir, { recursive: true });
   await fs.rm(outputPath, { force: true });
   await fs.writeFile(outputPath, output);
+  for (const entry of ['manifest.webmanifest', 'sw.js']) {
+    await fs.copyFile(path.join(root, entry), path.join(publicDir, entry));
+  }
+  for (const directory of ['assets', 'demo']) {
+    await fs.cp(path.join(root, directory), path.join(publicDir, directory), { recursive: true, force: true });
+  }
   console.log(`Frontend generado en public/index.html (${apiBase ? 'backend configurado' : 'backend sin configurar'})`);
 }
 

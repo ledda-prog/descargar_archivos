@@ -33,6 +33,14 @@ const PUBLIC_BASE_URL = validatePublicBaseUrl(process.env.PUBLIC_BASE_URL);
 const ALLOWED_ORIGINS = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
 const jobs = new Map();
 
+function publicExtractorError(message) {
+  const raw = String(message || 'yt-dlp no pudo procesar el enlace');
+  if (/Sign in to confirm you(?:'|’)re not a bot|Sign in to confirm|HTTP Error 429/i.test(raw)) {
+    return 'YouTube rechazó la solicitud automática desde este servidor. No es un problema de tu dispositivo: probá otro enlace autorizado o usá la descarga oficial de YouTube para contenido propio.';
+  }
+  return raw;
+}
+
 async function removeJobFiles(job) {
   if (job.tempDir) await fsp.rm(job.tempDir, { recursive: true, force: true });
 }
@@ -164,7 +172,7 @@ function runYtDlp(args, proxyUrl, { cwd, maxOutput = 2 * 1024 * 1024, watchSize 
       settled = true;
       if (onLine) for (const line of Object.values(pendingLines)) if (line) onLine(line);
       if (code === 0) resolve({ stdout: stdout.toString('utf8'), stderr: stderr.toString('utf8') });
-      else reject(Object.assign(new Error(stderr.toString('utf8').trim() || 'yt-dlp no pudo procesar el enlace'), { statusCode: 422 }));
+      else reject(Object.assign(new Error(publicExtractorError(stderr.toString('utf8').trim())), { statusCode: 422 }));
     });
   });
 }
@@ -274,9 +282,7 @@ async function processJob(job, url, format, quality, proxyUrl) {
     } else {
       job.status = 'failed';
       job.stage = 'No se pudo completar';
-      job.error = /Sign in to confirm|HTTP Error 429/i.test(error.message)
-        ? 'YouTube bloqueó temporalmente la solicitud. Esperá unos minutos y volvé a intentar.'
-        : error.message;
+      job.error = publicExtractorError(error.message);
     }
     scheduleJobExpiry(job);
   }
@@ -424,6 +430,7 @@ module.exports = {
   cancelJob,
   isSupportedJsonPostPath,
   jobs,
+  publicExtractorError,
   removeJobFiles,
   scheduleJobExpiry,
 };

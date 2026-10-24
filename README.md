@@ -2,6 +2,8 @@
 
 Aplicación para descargar contenido propio o autorizado desde URLs públicas compatibles con `yt-dlp`. Admite uso local y despliegue dividido: frontend estático en Vercel y backend Docker en Render.
 
+La versión web también es una PWA instalable. Incluye una demo multimedia propia en `demo/mediahub-demo.mp4` para comprobar consulta, selección de formato, progreso y descarga sin depender de servicios externos.
+
 ## Iniciar
 
 Hacer clic derecho en `start.ps1` y elegir **Ejecutar con PowerShell**, o ejecutar:
@@ -41,6 +43,7 @@ Configurar esta variable no publica la aplicación ni abre el servidor: por defe
 - Rechaza URLs locales/privadas, credenciales embebidas, puertos no permitidos y archivos mayores de 500 MB.
 - No usa cookies, sesiones privadas ni bypass de DRM.
 - Para YouTube usa clientes públicos alternativos compatibles con restricciones anti-bot, sin leer cookies del navegador.
+- YouTube puede rechazar las IP de centros de datos aunque el enlace sea público. En ese caso la aplicación muestra una explicación clara; no intenta evadir el control ni solicita credenciales.
 - Los trabajos listos, fallidos o cancelados vencen automáticamente para no acumular memoria ni archivos.
 
 ## Requisitos y pruebas

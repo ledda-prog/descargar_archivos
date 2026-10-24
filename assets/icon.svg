@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">MediaHub</title>
+  <desc id="desc">Flecha de descarga sobre un fondo azul oscuro</desc>
+  <rect width="512" height="512" rx="112" fill="#081827"/>
+  <circle cx="256" cy="256" r="174" fill="#102d43" stroke="#5ee3d7" stroke-width="16"/>
+  <path d="M232 132h48v168l62-62 34 34-120 120-120-120 34-34 62 62V132Z" fill="#5ee3d7"/>
+  <path d="M150 400h212" fill="none" stroke="#f7fbff" stroke-linecap="round" stroke-width="28"/>
+</svg>
