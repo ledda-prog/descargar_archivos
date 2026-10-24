@@ -15,7 +15,7 @@ npm install
 npm run desktop:dev
 ```
 
-Para generar `release/MediaHub-Portable-1.0.0.exe`:
+Para generar `release/MediaHub-Portable-<versión>.exe`:
 
 ```powershell
 npm run desktop:dist

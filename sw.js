@@ -1,9 +1,10 @@
-const CACHE_NAME = "mediahub-shell-v1";
+const CACHE_NAME = "mediahub-shell-v2";
 const SHELL_ASSETS = [
   "/",
   "/index.html",
   "/manifest.webmanifest",
   "/assets/icon.svg",
+  "/assets/icon.png",
 ];
 
 const isSensitiveRequest = (url) =>

@@ -269,10 +269,14 @@ test('build de Vercel reemplaza solo index.html y no borra public recursivamente
 
 test('PWA instala solo el shell y nunca cachea API ni descargas', async () => {
   const manifest = JSON.parse(await fs.readFile(path.join(__dirname, '..', 'manifest.webmanifest'), 'utf8'));
+  const packageJson = JSON.parse(await fs.readFile(path.join(__dirname, '..', 'package.json'), 'utf8'));
   const worker = await fs.readFile(path.join(__dirname, '..', 'sw.js'), 'utf8');
   const frontend = await fs.readFile(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.equal(manifest.display, 'standalone');
   assert.equal(manifest.start_url, '/');
+  assert.equal(manifest.theme_color, '#07110c');
+  assert.ok(manifest.icons.some((icon) => icon.src === '/assets/icon.png' && icon.sizes === '512x512'));
+  assert.equal(packageJson.build.win.icon, 'assets/icon.png');
   assert.match(worker, /startsWith\("\/api\/"\)/);
   assert.match(worker, /request\.mode === "navigate"/);
   assert.doesNotMatch(worker, /cache\.put/);
