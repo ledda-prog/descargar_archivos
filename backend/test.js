@@ -262,7 +262,7 @@ test('build de Vercel reemplaza solo index.html y no borra public recursivamente
   assert.match(buildScript, /fs\.rm\(outputPath, \{ force: true \}\)/);
   assert.match(buildScript, /fs\.writeFile\(outputPath, output\)/);
   assert.match(buildScript, /manifest\.webmanifest/);
-  assert.match(buildScript, /\['assets', 'demo'\]/);
+  assert.match(buildScript, /\['assets'\]/);
 });
 
 test('PWA instala solo el shell y nunca cachea API ni descargas', async () => {
@@ -275,7 +275,7 @@ test('PWA instala solo el shell y nunca cachea API ni descargas', async () => {
   assert.match(worker, /request\.mode === "navigate"/);
   assert.doesNotMatch(worker, /cache\.put/);
   assert.match(frontend, /beforeinstallprompt/);
-  assert.match(frontend, /demo\/mediahub-demo\.mp4/);
+  assert.doesNotMatch(frontend, /demo\/mediahub-demo\.mp4|Probar demo autorizada/);
 });
 
 test('frontend estático muestra errores de backend configurado o inaccesible', async () => {

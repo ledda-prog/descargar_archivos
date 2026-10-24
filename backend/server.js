@@ -179,7 +179,6 @@ function runYtDlp(args, proxyUrl, { cwd, maxOutput = 2 * 1024 * 1024, watchSize 
 
 const baseArgs = [
   '--no-playlist',
-  '--extractor-args', 'youtube:player_client=web_safari,web_embedded',
   '--socket-timeout', '15',
   '--retries', '2',
   '--extractor-retries', '2',
