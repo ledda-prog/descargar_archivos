@@ -290,6 +290,7 @@ test('frontend estático muestra errores de backend configurado o inaccesible', 
 
 test('landing ofrece la aplicación portable de Windows desde GitHub Releases', async () => {
   const frontend = await fs.readFile(path.join(__dirname, '..', 'index.html'), 'utf8');
-  assert.match(frontend, /Descargar para Windows/);
+  assert.match(frontend, /Integración de YouTube en proceso/);
+  assert.match(frontend, /solo se pueden descargar con la aplicación de escritorio/);
   assert.match(frontend, /github\.com\/ledda-prog\/descargar_archivos\/releases\/latest/);
 });
