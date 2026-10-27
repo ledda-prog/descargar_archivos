@@ -2,5 +2,19 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build",
   "outputDirectory": "public",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "functions": {
+    "api/info.js": {
+      "maxDuration": 300,
+      "includeFiles": "node_modules/youtube-dl-exec/bin/**"
+    }
+  },
+  "daemons": {
+    "mediahub-worker": {
+      "root": ".",
+      "entrypoint": "worker/Dockerfile",
+      "instances": { "iad1": 1 },
+      "terminationGracePeriodSeconds": 900
+    }
+  }
 }

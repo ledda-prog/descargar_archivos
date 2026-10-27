@@ -24,7 +24,7 @@ const { parseAllowedOrigins, resolveListenHost, validatePublicBaseUrl } = requir
 const HOST = resolveListenHost();
 const PORT = Number(process.env.PORT) || 3000;
 const INDEX_PATH = path.join(__dirname, '..', 'index.html');
-const YT_DLP_COMMAND = process.env.YT_DLP_PATH || 'yt-dlp';
+const YT_DLP_COMMAND = process.env.YT_DLP_PATH || require('youtube-dl-exec').constants.YOUTUBE_DL_PATH;
 const FFMPEG_PATH = process.env.FFMPEG_PATH || null;
 const MAX_FILE_BYTES = 500 * 1024 * 1024;
 const PROCESS_TIMEOUT_MS = 10 * 60 * 1000;
@@ -455,10 +455,13 @@ if (require.main === module) {
 
 module.exports = {
   cancelJob,
+  download,
+  getInfo,
   isSupportedJsonPostPath,
   jobs,
   publicExtractorError,
   removeJobFiles,
   scheduleJobExpiry,
   startServer,
+  updateProgress,
 };

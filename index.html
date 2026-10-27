@@ -45,7 +45,7 @@
         <h1>Descargá.<br><span>Elegí. Guardá.</span></h1>
         <p class="hero-lead">Una experiencia simple para preparar contenido multimedia propio o autorizado. Pegá el enlace, elegí la calidad y guardalo donde quieras.</p>
         <div class="trust-row" aria-label="Características principales"><span>Video MP4</span><span>Audio MP3</span><span>Calidad configurable</span></div>
-        <aside class="youtube-notice" role="note" aria-label="Aviso sobre YouTube"><span class="youtube-notice-icon" aria-hidden="true">▶</span><div><strong>YouTube, desde la aplicación</strong><p>La integración web sigue en proceso. Para YouTube, usá MediaHub Desktop para Windows.</p></div><a class="btn" href="https://github.com/ledda-prog/descargar_archivos/releases/latest" target="_blank" rel="noopener noreferrer">Descargar app <span aria-hidden="true">↗</span></a></aside></div>
+        <aside class="youtube-notice" role="note" aria-label="Aviso sobre YouTube"><span class="youtube-notice-icon" aria-hidden="true">▶</span><div><strong>YouTube web en beta</strong><p>La web procesa enlaces públicos desde Vercel. Si YouTube rechaza su IP, MediaHub Desktop sigue siendo la alternativa más confiable.</p></div><a class="btn" href="https://github.com/ledda-prog/descargar_archivos/releases/latest" target="_blank" rel="noopener noreferrer">Descargar app <span aria-hidden="true">↗</span></a></aside></div>
         <div class="workspace-shell"><div class="workspace-head"><div><span class="workspace-kicker">Nueva descarga</span><strong>Prepará tu archivo</strong></div><span class="privacy-badge">Privado y temporal</span></div><div class="card download">
           <form id="downloadForm" novalidate>
             <label class="field-label" for="url">Pegá el enlace del contenido</label>
@@ -83,7 +83,7 @@
       'use strict';
       const configuredApiBase=typeof window.MEDIAHUB_API_BASE==='string'?window.MEDIAHUB_API_BASE.trim():'';
       const localFrontend=location.protocol==='file:'||['localhost','127.0.0.1','::1','[::1]'].includes(location.hostname.toLowerCase());
-      const API_BASE=(configuredApiBase||(localFrontend?(location.protocol==='file:'?'http://127.0.0.1:3000':location.origin):'')).replace(/\/$/,'');
+      const API_BASE=(configuredApiBase||(location.protocol==='file:'?'http://127.0.0.1:3000':location.origin)).replace(/\/$/,'');
       const $=selector=>document.querySelector(selector);
       const form=$('#downloadForm'),urlInput=$('#url'),permission=$('#permission'),button=$('#submit'),installButton=$('#installButton'),networkState=$('#networkState'),cancelButton=$('#cancelButton'),shareButton=$('#shareButton'),copyLinkButton=$('#copyLinkButton'),whatsAppButton=$('#whatsAppButton'),shareHint=$('#shareHint'),statusBox=$('#status'),progress=$('#progress'),result=$('#result'),thumbnail=$('#thumbnail'),mediaTitle=$('#mediaTitle'),platform=$('#platform'),duration=$('#duration'),formatRows=$('#formatRows'),historyList=$('#historyList'),historyEmpty=$('#historyEmpty'),clearHistoryButton=$('#clearHistoryButton');
       const HISTORY_KEY='mediahub.downloadHistory.v1',HISTORY_LIMIT=20;
@@ -215,7 +215,7 @@
         catch{return 'El servidor respondió con error '+response.status+'.'}
       }
       async function requestJson(path,options={}){
-        if(!API_BASE)throw new Error('El backend no está configurado. Definí MEDIAHUB_API_BASE con la URL HTTPS de Render y volvé a desplegar el frontend.');
+        if(!API_BASE)throw new Error('El backend no está configurado.');
         let response;
         try{response=await fetch(API_BASE+path,options)}
         catch{throw new Error('No se pudo conectar con el servicio de descargas en '+API_BASE+'. Puede estar iniciándose o temporalmente fuera de servicio.')}
@@ -245,8 +245,7 @@
       function setShareDisabled(disabled){shareButton.disabled=disabled;copyLinkButton.disabled=disabled;whatsAppButton.disabled=disabled}
       function shareMessage(action){return action+(isLocalShareUrl(shareUrl())?' El enlace es local y solo funciona en este equipo.':'')}
       shareButton.hidden=!navigator.share;
-      if(API_BASE)loadPublicConfig();
-      else{button.disabled=true;showStatus('error','Backend no configurado','Falta MEDIAHUB_API_BASE. Configurá en Vercel la URL HTTPS de tu servicio de Render y volvé a desplegar.')}
+      loadPublicConfig();
       function secondsToTime(value){
         const total=Number(value);
         if(!Number.isFinite(total)||total<0)return 'Duración no disponible';
@@ -307,7 +306,7 @@
         card.classList.remove('downloading','complete','error');card.style.setProperty('--download-progress',percent+'%');card.classList.add(state);card.querySelector('output').textContent=state==='error'?' · Error':' · '+percent+'%';
       }
       async function createJob(format,quality){
-        if(!API_BASE)throw new Error('El backend no está configurado. Volvé a desplegar con MEDIAHUB_API_BASE.');
+        if(!API_BASE)throw new Error('El backend no está configurado.');
         let response;
         try{response=await fetch(API_BASE+'/api/jobs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:currentMedia.sourceUrl,format:format==='audio'?'audio':'video',quality})})}
         catch{throw new Error('No se pudo conectar con el servicio de descargas en '+API_BASE+'.')}
@@ -338,7 +337,7 @@
         }
         return null;
       }
-      function jobFileUrl(job){return API_BASE+'/api/jobs/'+encodeURIComponent(job.id)+'/file'}
+      function jobFileUrl(job){return job.download_url||API_BASE+'/api/jobs/'+encodeURIComponent(job.id)+'/file'}
       function startNativeJobDownload(job){
         const link=document.createElement('a');
         link.href=jobFileUrl(job);link.hidden=true;document.body.appendChild(link);link.click();link.remove();

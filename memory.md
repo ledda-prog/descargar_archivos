@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-MediaHub es una aplicación web local funcional. Usa Node.js, `yt-dlp` y FFmpeg para consultar y descargar URLs públicas compatibles.
+MediaHub funciona localmente y tiene preparada una arquitectura web completa para Vercel. Usa Node.js, `yt-dlp` y FFmpeg para consultar y descargar URLs públicas compatibles.
 
 ## Decisiones
 
@@ -20,9 +20,13 @@ MediaHub es una aplicación web local funcional. Usa Node.js, `yt-dlp` y FFmpeg 
 - El historial vive solo en `localStorage`, admite hasta 20 entradas y no conserva archivos ni IDs de trabajos.
 - `PUBLIC_BASE_URL` es opcional, solo acepta HTTPS (o HTTP local de desarrollo) y define el enlace compartido sin publicar ni reconfigurar la escucha local.
 - La interfaz ofrece Web Share cuando existe, copiar enlace y WhatsApp; advierte cuando la URL solo funciona en el mismo equipo.
+- En Vercel, `api/` atiende consultas y trabajos, Vercel Queue los entrega, un Daemon ejecuta `yt-dlp`/FFmpeg y Blob privado conserva estado y archivos.
+- La descarga web recibe un enlace firmado de Blob por quince minutos; los archivos no atraviesan la respuesta de una Function.
+- El frontend desplegado usa la API del mismo dominio e ignora la antigua URL de Render.
 
 ## Pendientes
 
 1. Probar con enlaces propios de cada plataforma objetivo.
 2. Adaptar extractores cuando las plataformas cambien.
-3. Para publicar, el usuario todavía debe elegir dominio HTTPS, proveedor/infraestructura y política de acceso; luego hay que incorporar autenticación, cuotas, rate limiting, cola y almacenamiento temporal privado.
+3. Conectar un Blob store privado al proyecto Vercel y desplegar a Production.
+4. Antes de abrirlo a usuarios no confiables: autenticación, cuotas, rate limiting y política de retención/eliminación de Blob.

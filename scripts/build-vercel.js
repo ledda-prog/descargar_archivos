@@ -17,7 +17,7 @@ function validateApiBase(value) {
 async function build() {
   const root = path.join(__dirname, '..');
   const source = await fs.readFile(path.join(root, 'index.html'), 'utf8');
-  const apiBase = validateApiBase(process.env.MEDIAHUB_API_BASE);
+  const apiBase = process.env.VERCEL ? '' : validateApiBase(process.env.MEDIAHUB_API_BASE);
   const marker = '<!-- MEDIAHUB_API_CONFIG -->';
   if (!source.includes(marker)) throw new Error('Falta el marcador de configuración del frontend');
   const serializedApiBase = JSON.stringify(apiBase).replace(/</g, '\\u003c');

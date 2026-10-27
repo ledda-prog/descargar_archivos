@@ -1,12 +1,12 @@
 # MediaHub
 
-Aplicación para descargar contenido propio o autorizado desde URLs públicas compatibles con `yt-dlp`. Admite uso local y despliegue dividido: frontend estático en Vercel y backend Docker en Render.
+Aplicación para descargar contenido propio o autorizado desde URLs públicas compatibles con `yt-dlp`. Admite uso local y una arquitectura completa en Vercel.
 
 La versión web también es una PWA instalable.
 
 ## Aplicación portable para Windows
 
-La landing pública continúa en Vercel, pero la versión de Windows ejecuta el backend, `yt-dlp` y FFmpeg en la PC del usuario. Así, el procesamiento usa su conexión en lugar de la IP de Render. No garantiza que todas las plataformas acepten todos los enlaces y no evade autenticación, DRM ni restricciones.
+La versión de Windows ejecuta el backend, `yt-dlp` y FFmpeg en la PC del usuario. Así, el procesamiento usa su conexión en lugar de una IP de centro de datos. No garantiza que todas las plataformas acepten todos los enlaces y no evade autenticación, DRM ni restricciones.
 
 Para desarrollo:
 
@@ -63,7 +63,7 @@ Configurar esta variable no publica la aplicación ni abre el servidor: por defe
 - No usa cookies, sesiones privadas ni bypass de DRM.
 - Para YouTube deja que la versión actual de `yt-dlp` seleccione automáticamente los clientes públicos compatibles, sin leer cookies del navegador.
 - YouTube puede rechazar las IP de centros de datos aunque el enlace sea público. En ese caso la aplicación muestra una explicación clara; no intenta evadir el control ni solicita credenciales.
-- Los trabajos listos, fallidos o cancelados vencen automáticamente para no acumular memoria ni archivos.
+- En la aplicación local, los trabajos listos, fallidos o cancelados vencen automáticamente para no acumular memoria ni archivos.
 
 ## Requisitos y pruebas
 
@@ -75,49 +75,31 @@ npm test
 
 Consultar [TESTING.md](TESTING.md) para pruebas manuales.
 
-## Despliegue dividido
+## Despliegue completo en Vercel
 
-No se despliega automáticamente. El orden recomendado es Render primero y Vercel después.
+La web usa cuatro piezas del mismo proyecto:
 
-La versión web mantiene este despliegue. La aplicación portable no depende de Render para procesar descargas.
+- `public/`: landing estática.
+- `api/`: consulta de enlaces y estado de trabajos.
+- Vercel Queue: entrega durable de descargas.
+- Vercel Daemon + Blob privado: ejecuta `yt-dlp`/FFmpeg y entrega archivos mediante enlaces temporales.
 
-### 1. Backend en Render
+Configuración del proyecto [MediaHub](https://media-hub-umber.vercel.app):
 
-1. Subir el proyecto a un repositorio privado o autorizado para Render.
-2. En Render, crear un Blueprint usando `render.yaml`. Este usa `Dockerfile`, el plan gratuito y `/api/health`.
-3. Esperar la URL HTTPS del servicio, por ejemplo `https://mediahub-backend.onrender.com`.
-4. Confirmar que `https://TU-SERVICIO.onrender.com/api/health` responde `{ "ok": true }`.
+1. Framework preset **Other**, build `npm run build` y salida `public`.
+2. Crear un Blob store **privado** y conectarlo al proyecto. Vercel proporciona `BLOB_READ_WRITE_TOKEN` o la identidad OIDC correspondiente.
+3. Mantener `QUEUE_REGION=iad1` en Production para que API y daemon usen la misma región.
+4. Configurar `PUBLIC_BASE_URL=https://media-hub-umber.vercel.app` si se quiere fijar el enlace compartido.
+5. Eliminar la antigua variable `MEDIAHUB_API_BASE` de Render. En Vercel el build fuerza la API del mismo dominio.
+6. Desplegar a Production. `vercel.json` crea un daemon `mediahub-worker` en `iad1`; `worker/Dockerfile` instala `yt-dlp` y FFmpeg.
 
-Variables del backend:
+Vercel Daemons y Queues están en beta. El plan Hobby permite probarlos dentro de su cuota, pero el procesamiento y la transferencia de multimedia consumen recursos. Los archivos quedan privados y el navegador recibe un enlace firmado por quince minutos.
 
-- `RENDER=true`: hace que el servidor escuche en `0.0.0.0`; localmente escucha en `127.0.0.1`.
-- `PORT`: Render la establece. Localmente se usa `3000`.
-- `ALLOWED_ORIGINS=https://media-hub-umber.vercel.app`: lista separada por comas de orígenes HTTPS exactos. No admite comodines.
-- `PUBLIC_BASE_URL=https://media-hub-umber.vercel.app`: enlace de la página que usan Compartir, Copiar y WhatsApp.
-
-El contenedor ejecuta Node 20 como usuario sin privilegios e instala FFmpeg y `yt-dlp` dentro de un entorno virtual de Python.
-
-### 2. Frontend en Vercel
-
-En el proyecto Vercel de [MediaHub](https://media-hub-umber.vercel.app), configurar:
-
-- Framework preset: **Other**.
-- Build command: `npm run build` (también está declarado en `vercel.json`).
-- Output directory: `public`.
-- Variable de entorno: `MEDIAHUB_API_BASE=https://TU-SERVICIO.onrender.com`.
-
-`npm run build` valida que `MEDIAHUB_API_BASE` use HTTPS, genera `public/index.html` e inyecta allí la URL del backend. Si falta la variable, el build funciona pero la interfaz queda bloqueada con un mensaje claro de configuración pendiente.
-
-Después de conocer la URL definitiva de Vercel, debe coincidir exactamente con `ALLOWED_ORIGINS` en Render. Los previews de Vercel no quedan autorizados automáticamente; se deben añadir uno por uno si se desean usar.
-
-### Comprobación local del frontend generado
+Para comprobar solamente el frontend local:
 
 ```powershell
-$env:MEDIAHUB_API_BASE = 'https://TU-SERVICIO.onrender.com'
 npm run build
 ```
-
-El resultado estático queda en `public/index.html`.
 
 ## Seguridad para producción
 
@@ -131,4 +113,4 @@ Antes de publicar se necesita, como mínimo:
 - Registro seguro de errores y métricas, sin guardar enlaces sensibles innecesariamente.
 - Revisión de derechos de autor, privacidad y términos/API oficiales de cada plataforma.
 
-El despliegue público debe incorporar autenticación, cuotas y rate limiting antes de admitir usuarios no confiables. Render gratuito puede suspender el servicio por inactividad; la interfaz informará si el backend todavía está iniciándose o no está disponible.
+El despliegue público debe incorporar autenticación, cuotas, rate limiting y una política explícita de retención antes de admitir usuarios no confiables. YouTube todavía puede rechazar las IP de Vercel; la arquitectura mejora persistencia y entrega, pero no evade ese control de la plataforma.

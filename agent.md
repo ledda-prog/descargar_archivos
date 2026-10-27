@@ -15,4 +15,7 @@
 - `backend/security.js`: validación SSRF, CORS y nombres seguros.
 - `backend/test.js`: pruebas automatizadas.
 - `backend/API-CONTRACT.md`: contrato actual del backend.
+- `api/`: Functions de Vercel para metadatos, creación y consulta de trabajos.
+- `backend/vercel-store.js`: estado durable de trabajos en Blob privado.
+- `worker/`: Daemon de Vercel que consume Queue y procesa multimedia.
 - `start.ps1`: inicio para Windows con verificación de dependencias.

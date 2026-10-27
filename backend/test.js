@@ -267,6 +267,18 @@ test('build de Vercel reemplaza solo index.html y no borra public recursivamente
   assert.match(buildScript, /\['assets'\]/);
 });
 
+test('Vercel declara API, almacenamiento durable y daemon de procesamiento', async () => {
+  const config = JSON.parse(await fs.readFile(path.join(__dirname, '..', 'vercel.json'), 'utf8'));
+  const worker = await fs.readFile(path.join(__dirname, '..', 'worker', 'worker.js'), 'utf8');
+  const dockerfile = await fs.readFile(path.join(__dirname, '..', 'worker', 'Dockerfile'), 'utf8');
+  assert.equal(config.outputDirectory, 'public');
+  assert.equal(config.daemons['mediahub-worker'].instances.iad1, 1);
+  assert.match(worker, /PollingQueueClient/);
+  assert.match(worker, /access: 'private'/);
+  assert.match(dockerfile, /yt-dlp/);
+  assert.match(dockerfile, /ffmpeg/);
+});
+
 test('PWA instala solo el shell y nunca cachea API ni descargas', async () => {
   const manifest = JSON.parse(await fs.readFile(path.join(__dirname, '..', 'manifest.webmanifest'), 'utf8'));
   const packageJson = JSON.parse(await fs.readFile(path.join(__dirname, '..', 'package.json'), 'utf8'));
@@ -284,17 +296,17 @@ test('PWA instala solo el shell y nunca cachea API ni descargas', async () => {
   assert.doesNotMatch(frontend, /demo\/mediahub-demo\.mp4|Probar demo autorizada/);
 });
 
-test('frontend estático muestra errores de backend configurado o inaccesible', async () => {
+test('frontend usa el backend de Vercel en el mismo origen y muestra fallos de conexión', async () => {
   const frontend = await fs.readFile(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.match(frontend, /MEDIAHUB_API_CONFIG/);
-  assert.match(frontend, /Backend no configurado/);
+  assert.match(frontend, /location\.origin/);
   assert.match(frontend, /Backend no disponible/);
   assert.match(frontend, /servicio de descargas/);
 });
 
 test('landing ofrece la aplicación portable de Windows desde GitHub Releases', async () => {
   const frontend = await fs.readFile(path.join(__dirname, '..', 'index.html'), 'utf8');
-  assert.match(frontend, /integración web sigue en proceso/i);
-  assert.match(frontend, /Para YouTube, usá MediaHub Desktop/);
+  assert.match(frontend, /YouTube web en beta/i);
+  assert.match(frontend, /MediaHub Desktop sigue siendo la alternativa más confiable/);
   assert.match(frontend, /github\.com\/ledda-prog\/descargar_archivos\/releases\/latest/);
 });
