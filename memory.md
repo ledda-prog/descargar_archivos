@@ -22,7 +22,7 @@ MediaHub funciona localmente y tiene preparada una arquitectura web completa par
 - La interfaz ofrece Web Share cuando existe, copiar enlace y WhatsApp; advierte cuando la URL solo funciona en el mismo equipo.
 - En Vercel, `api/` atiende consultas y trabajos, Vercel Queue los entrega, un Daemon ejecuta `yt-dlp`/FFmpeg y Blob privado conserva estado y archivos.
 - La descarga web recibe un enlace firmado de Blob por quince minutos; los archivos no atraviesan la respuesta de una Function.
-- El frontend desplegado usa la API del mismo dominio e ignora la antigua URL de Render.
+- El frontend desplegado usa la API del mismo dominio de Vercel.
 
 ## Pendientes
 

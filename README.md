@@ -90,8 +90,7 @@ Configuración del proyecto [MediaHub](https://media-hub-umber.vercel.app):
 2. Crear un Blob store **privado** y conectarlo al proyecto. Vercel proporciona `BLOB_READ_WRITE_TOKEN` o la identidad OIDC correspondiente.
 3. Mantener `QUEUE_REGION=iad1` en Production para que API y daemon usen la misma región.
 4. Configurar `PUBLIC_BASE_URL=https://media-hub-umber.vercel.app` si se quiere fijar el enlace compartido.
-5. Eliminar la antigua variable `MEDIAHUB_API_BASE` de Render. En Vercel el build fuerza la API del mismo dominio.
-6. Desplegar a Production. `vercel.json` crea un daemon `mediahub-worker` en `iad1`; `worker/Dockerfile` instala `yt-dlp` y FFmpeg.
+5. Desplegar a Production. `vercel.json` crea un daemon `mediahub-worker` en `iad1`; `worker/Dockerfile` instala `yt-dlp` y FFmpeg.
 
 Vercel Daemons y Queues están en beta. El plan Hobby permite probarlos dentro de su cuota, pero el procesamiento y la transferencia de multimedia consumen recursos. Los archivos quedan privados y el navegador recibe un enlace firmado por quince minutos.
 

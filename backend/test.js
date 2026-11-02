@@ -229,10 +229,8 @@ test('config pública y compartir conservan servidor local y fallbacks visibles'
   assert.match(frontend, /solo funciona en este mismo equipo/);
 });
 
-test('host escucha local salvo Render o HOST explícito', () => {
+test('host escucha local salvo HOST explícito', () => {
   assert.equal(resolveListenHost({}), '127.0.0.1');
-  assert.equal(resolveListenHost({ RENDER: 'true' }), '0.0.0.0');
-  assert.equal(resolveListenHost({ RENDER: 'false' }), '127.0.0.1');
   assert.equal(resolveListenHost({ HOST: '192.0.2.10' }), '192.0.2.10');
   assert.throws(() => resolveListenHost({ HOST: 'bad\nhost' }), /inválidos/);
 });
@@ -250,8 +248,8 @@ test('CORS acepta localhost y orígenes HTTPS configurados exactamente', () => {
 
 test('build de Vercel solo acepta backend HTTPS', () => {
   assert.equal(validateApiBase(undefined), '');
-  assert.equal(validateApiBase('https://mediahub-backend.onrender.com/'), 'https://mediahub-backend.onrender.com');
-  assert.throws(() => validateApiBase('http://mediahub-backend.onrender.com'), /HTTPS/);
+  assert.equal(validateApiBase('https://api.example.test/'), 'https://api.example.test');
+  assert.throws(() => validateApiBase('http://api.example.test'), /HTTPS/);
   assert.throws(() => validateApiBase('https://user:pass@example.test'), /credenciales/);
   assert.throws(() => validateApiBase('https://example.test/?token=secret'), /consulta/);
 });
@@ -308,9 +306,9 @@ test('frontend usa el backend de Vercel en el mismo origen y muestra fallos de c
   assert.match(frontend, /servicio de descargas/);
 });
 
-test('landing ofrece la aplicación portable de Windows desde GitHub Releases', async () => {
+test('landing ofrece instalación local en PC y celular', async () => {
   const frontend = await fs.readFile(path.join(__dirname, '..', 'index.html'), 'utf8');
-  assert.match(frontend, /YouTube web en beta/i);
-  assert.match(frontend, /MediaHub Desktop sigue siendo la alternativa más confiable/);
-  assert.match(frontend, /github\.com\/ledda-prog\/descargar_archivos\/releases\/latest/);
+  assert.match(frontend, /Instalar en PC o celular/i);
+  assert.match(frontend, /Agregar a pantalla de inicio/);
+  assert.doesNotMatch(frontend, /YouTube web en beta/i);
 });

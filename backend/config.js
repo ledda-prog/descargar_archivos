@@ -39,7 +39,7 @@ function resolveListenHost(env = process.env) {
     if (!/^[a-zA-Z0-9.:[\]-]+$/.test(explicit)) throw new Error('HOST contiene caracteres inválidos');
     return explicit;
   }
-  return String(env.RENDER || '').toLowerCase() === 'true' ? '0.0.0.0' : '127.0.0.1';
+  return '127.0.0.1';
 }
 
 module.exports = { parseAllowedOrigins, resolveListenHost, validatePublicBaseUrl };
