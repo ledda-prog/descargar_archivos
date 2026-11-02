@@ -3,12 +3,6 @@
   "buildCommand": "npm run build",
   "outputDirectory": "public",
   "cleanUrls": true,
-  "functions": {
-    "api/info.js": {
-      "maxDuration": 300,
-      "includeFiles": "node_modules/youtube-dl-exec/bin/**"
-    }
-  },
   "daemons": {
     "mediahub-worker": {
       "root": ".",

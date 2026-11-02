@@ -132,7 +132,7 @@ test('expira un trabajo fallido y elimina sus temporales sin red', async () => {
   const job = { id: 'failed-test', status: 'failed', tempDir };
   jobs.set(job.id, job);
   scheduleJobExpiry(job, 10);
-  await new Promise((resolve) => setTimeout(resolve, 40));
+  await new Promise((resolve) => setTimeout(resolve, 150));
   assert.equal(jobs.has(job.id), false);
   await assert.rejects(fs.stat(tempDir), { code: 'ENOENT' });
 });
@@ -269,10 +269,13 @@ test('build de Vercel reemplaza solo index.html y no borra public recursivamente
 
 test('Vercel declara API, almacenamiento durable y daemon de procesamiento', async () => {
   const config = JSON.parse(await fs.readFile(path.join(__dirname, '..', 'vercel.json'), 'utf8'));
+  const infoApi = await fs.readFile(path.join(__dirname, '..', 'api', 'info.js'), 'utf8');
   const worker = await fs.readFile(path.join(__dirname, '..', 'worker', 'worker.js'), 'utf8');
   const dockerfile = await fs.readFile(path.join(__dirname, '..', 'Dockerfile'), 'utf8');
   assert.equal(config.outputDirectory, 'public');
   assert.equal(config.daemons['mediahub-worker'].instances.iad1, 1);
+  assert.doesNotMatch(infoApi, /backend\/server/);
+  assert.match(infoApi, /youtube\.com\/oembed/);
   assert.match(worker, /PollingQueueClient/);
   assert.match(worker, /access: 'private'/);
   assert.match(dockerfile, /yt-dlp/);
