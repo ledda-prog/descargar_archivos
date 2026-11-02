@@ -12,7 +12,7 @@
   "daemons": {
     "mediahub-worker": {
       "root": ".",
-      "entrypoint": "worker/Dockerfile",
+      "entrypoint": "Dockerfile",
       "instances": { "iad1": 1 },
       "terminationGracePeriodSeconds": 900
     }

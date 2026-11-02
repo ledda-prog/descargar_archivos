@@ -1,0 +1,16 @@
+{
+  "name": "mediahub-vercel-worker",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@vercel/blob": "2.8.2",
+    "@vercel/queue": "0.10.0"
+  },
+  "overrides": {
+    "zod": "4.6.7",
+    "minimatch": "11.0.4"
+  }
+}

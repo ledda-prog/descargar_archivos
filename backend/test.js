@@ -270,13 +270,14 @@ test('build de Vercel reemplaza solo index.html y no borra public recursivamente
 test('Vercel declara API, almacenamiento durable y daemon de procesamiento', async () => {
   const config = JSON.parse(await fs.readFile(path.join(__dirname, '..', 'vercel.json'), 'utf8'));
   const worker = await fs.readFile(path.join(__dirname, '..', 'worker', 'worker.js'), 'utf8');
-  const dockerfile = await fs.readFile(path.join(__dirname, '..', 'worker', 'Dockerfile'), 'utf8');
+  const dockerfile = await fs.readFile(path.join(__dirname, '..', 'Dockerfile'), 'utf8');
   assert.equal(config.outputDirectory, 'public');
   assert.equal(config.daemons['mediahub-worker'].instances.iad1, 1);
   assert.match(worker, /PollingQueueClient/);
   assert.match(worker, /access: 'private'/);
   assert.match(dockerfile, /yt-dlp/);
   assert.match(dockerfile, /ffmpeg/);
+  assert.match(dockerfile, /worker\/worker\.js/);
 });
 
 test('PWA instala solo el shell y nunca cachea API ni descargas', async () => {

@@ -2,7 +2,8 @@ FROM node:20-bookworm-slim
 
 ENV NODE_ENV=production \
     PYTHONUNBUFFERED=1 \
-    YT_DLP_PATH=/opt/yt-dlp-venv/bin/yt-dlp
+    YT_DLP_PATH=/opt/yt-dlp-venv/bin/yt-dlp \
+    FFMPEG_PATH=/usr/bin/ffmpeg
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates ffmpeg python3 python3-pip python3-venv \
@@ -12,10 +13,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY --chown=node:node package.json ./
+COPY worker/package.json worker/package-lock.json ./
+RUN npm ci --omit=dev
 COPY --chown=node:node backend ./backend
-COPY --chown=node:node index.html ./index.html
+COPY --chown=node:node worker/worker.js ./worker/worker.js
 
 USER node
-EXPOSE 10000
-CMD ["node", "backend/server.js"]
+CMD ["node", "worker/worker.js"]
